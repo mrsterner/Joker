@@ -37,10 +37,11 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun tick() {
         super.tick()
+
     }
 
-    override fun render(guiGraphics: GuiGraphics, i: Int, j: Int, f: Float) {
-        super.render(guiGraphics, i, j, f)
+    override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick)
 
     }
 
