@@ -17,15 +17,18 @@
 	"entrypoints": {
 		"main": [
 			{
-				"value": "dev.sterner.joker.Joker",
+				"value": "dev.sterner.joker.JokerMod",
 				"adapter": "kotlin"
 			}
 		],
 		"client": [
 			{
-				"value": "dev.sterner.joker.Joker",
+				"value": "dev.sterner.joker.JokerMod",
 				"adapter": "kotlin"
 			}
+		],
+		"cardinal-components": [
+			"dev.sterner.joker.component.JokerComponents"
 		],
 		"fabric-datagen": [
 			{

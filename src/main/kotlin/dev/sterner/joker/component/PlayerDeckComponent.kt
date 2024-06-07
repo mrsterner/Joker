@@ -31,12 +31,12 @@ class PlayerDeckComponent(val player: Player) : AutoSyncedComponent {
 
     fun addCard(card: Card) {
         deck.add(card)
-        JokerMod.DECK.sync(player)
+        JokerComponents.DECK.sync(player)
     }
 
     fun removeCard(card: Card) {
         deck.remove(card)
-        JokerMod.DECK.sync(player)
+        JokerComponents.DECK.sync(player)
     }
 
     override fun readFromNbt(tag: CompoundTag, registryLookup: HolderLookup.Provider) {
