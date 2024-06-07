@@ -38,7 +38,9 @@
 		"fabric-api": "*",
 		"fabric-language-kotlin": "*"
 	},
-	"suggests": {
-		"another-mod": "*"
+	"custom": {
+		"cardinal-components": [
+			"joker:deck"
+		]
 	}
 }

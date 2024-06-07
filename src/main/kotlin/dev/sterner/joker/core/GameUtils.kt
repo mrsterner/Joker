@@ -4,12 +4,12 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import java.util.*
 
-class GameUtils {
+object GameUtils {
 
     /**
      * Returns a deck sorted deck of every rank and suit, suits * rank = 52
      */
-    fun createStandardDeck(): List<Card> {
+    fun createStandardDeck(): MutableList<Card> {
         val deck = mutableListOf<Card>()
         for (suit in Suit.entries) {
             for (rank in Rank.entries) {
@@ -104,9 +104,8 @@ class GameUtils {
         return Card(suit, rank, special, stamp)
     }
 
-    fun writeDeckToTag(deck: MutableList<Card>) : CompoundTag {
+    fun writeDeckToTag(tag: CompoundTag, deck: MutableList<Card>) : CompoundTag {
         val tagList = ListTag()
-        val tag = CompoundTag()
 
         for (card in deck) {
             val cardTag = writeCardToTag(card)

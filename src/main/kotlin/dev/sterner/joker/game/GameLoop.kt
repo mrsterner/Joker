@@ -1,6 +1,5 @@
 package dev.sterner.joker.game
 
-import dev.sterner.joker.JokerMod
 import dev.sterner.joker.core.*
 
 class GameLoop {
