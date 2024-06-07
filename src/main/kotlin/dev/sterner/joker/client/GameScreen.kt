@@ -3,6 +3,8 @@ package dev.sterner.joker.client
 import dev.sterner.joker.JokerMod
 import dev.sterner.joker.core.Card
 import net.minecraft.client.GameNarrator
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Player
@@ -12,8 +14,6 @@ class GameScreen(component: Component) : Screen(component) {
 
     var player: Player? = null
     var deck: MutableList<Card>? = null
-
-
 
     constructor(player: Player) : this(GameNarrator.NO_TITLE) {
         this.player = player
@@ -30,9 +30,7 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
         if (button == 0) {
-            if (tab != null) {
-                return tab.move(mouseX, mouseY, button, deltaX, deltaY)
-            }
+
         }
         return false
     }
@@ -41,7 +39,28 @@ class GameScreen(component: Component) : Screen(component) {
         super.tick()
     }
 
+    override fun render(guiGraphics: GuiGraphics, i: Int, j: Int, f: Float) {
+        super.render(guiGraphics, i, j, f)
+
+    }
+
     override fun isPauseScreen(): Boolean {
         return false
     }
+
+    companion object{
+        var screen: GameScreen? = null
+
+        fun openScreen(player: Player) {
+            Minecraft.getInstance().setScreen(getInstance(player))
+        }
+
+        fun getInstance(player: Player): GameScreen {
+            if (screen == null) {
+                screen = GameScreen(player)
+            }
+            return screen!!
+        }
+    }
+
 }

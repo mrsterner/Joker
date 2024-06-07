@@ -6,5 +6,6 @@ import java.awt.Point
 class CardScreenObject {
     var centerPoint: Point? = null
     var card: Card? = null
-
+    var width: Int? = 31
+    var height = 45
 }

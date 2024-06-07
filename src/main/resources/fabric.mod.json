@@ -21,6 +21,12 @@
 				"adapter": "kotlin"
 			}
 		],
+		"client": [
+			{
+				"value": "dev.sterner.joker.Joker",
+				"adapter": "kotlin"
+			}
+		],
 		"fabric-datagen": [
 			{
 				"value": "dev.sterner.joker.JokerDataGenerator",
