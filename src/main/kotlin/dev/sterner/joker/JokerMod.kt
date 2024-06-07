@@ -15,7 +15,7 @@ object JokerMod : ModInitializer, EntityComponentInitializer {
 	private val id: String = "joker"
     private val logger = LoggerFactory.getLogger(id)
 
-	val MAGIK: ComponentKey<PlayerDeckComponent> = ComponentRegistryV3.INSTANCE.getOrCreate(
+	val DECK: ComponentKey<PlayerDeckComponent> = ComponentRegistryV3.INSTANCE.getOrCreate(
 		id("deck"),
 		PlayerDeckComponent::class.java
 	)

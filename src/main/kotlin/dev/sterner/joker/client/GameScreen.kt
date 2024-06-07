@@ -1,5 +1,6 @@
 package dev.sterner.joker.client
 
+import dev.sterner.joker.JokerMod
 import dev.sterner.joker.core.Card
 import net.minecraft.client.GameNarrator
 import net.minecraft.client.gui.screens.Screen
@@ -10,10 +11,13 @@ import net.minecraft.world.entity.player.Player
 class GameScreen(component: Component) : Screen(component) {
 
     var player: Player? = null
-    var deck: List<Card>? = null
+    var deck: MutableList<Card>? = null
 
-    constructor(Player: Player) : this(GameNarrator.NO_TITLE) {
+
+
+    constructor(player: Player) : this(GameNarrator.NO_TITLE) {
         this.player = player
+        this.deck = JokerMod.DECK.get(player).deck
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
