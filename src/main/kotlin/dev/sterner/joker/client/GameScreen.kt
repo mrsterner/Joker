@@ -1,5 +1,7 @@
 package dev.sterner.joker.client
 
+import com.mojang.blaze3d.platform.Lighting
+import com.mojang.blaze3d.systems.RenderSystem
 import dev.sterner.joker.JokerMod
 import dev.sterner.joker.component.JokerComponents
 import dev.sterner.joker.core.Card
@@ -7,9 +9,13 @@ import net.minecraft.client.GameNarrator
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
+import org.joml.Quaternionf
+import org.joml.Vector3f
 
 
 class GameScreen(component: Component) : Screen(component) {
@@ -47,23 +53,22 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.render(guiGraphics, mouseX, mouseY, partialTick)
-
     }
 
     override fun renderBackground(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         this.renderTransparentBackground(guiGraphics)
         this.renderBg(guiGraphics, partialTick, mouseX, mouseY)
-
-
     }
 
     fun renderBg(guiGraphics: GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {
         val i = (this.width - this.imageWidth) / 2
         val j = (this.height - this.imageHeight) / 2
 
+        //Draw transparent line on top of gui, and bottom
         guiGraphics.fillGradient(0, j - 3, this.width, j, -1072689136, -804253680)
         guiGraphics.fillGradient(0, j + this.imageHeight, this.width, j + this.imageHeight + 3, -1072689136, -804253680)
 
+        //Draw texture
         guiGraphics.blit(
             this.BACKGROUND_TEXTURE, i, j, 0, 0.0f, 0.0f,
             this.imageWidth,
@@ -87,6 +92,48 @@ class GameScreen(component: Component) : Screen(component) {
                 screen = GameScreen(player)
             }
             return screen!!
+        }
+
+        fun renderEntityInInventory(
+            guiGraphics: GuiGraphics,
+            x: Float,
+            y: Float,
+            scale: Float,
+            translate: Vector3f,
+            pose: Quaternionf?,
+            cameraOrientation: Quaternionf?,
+            entity: LivingEntity
+        ) {
+            guiGraphics.pose().pushPose()
+            guiGraphics.pose().translate(x.toDouble(), y.toDouble(), 50.0)
+            guiGraphics.pose().scale(scale, scale, -scale)
+            guiGraphics.pose().translate(translate.x, translate.y, translate.z)
+            guiGraphics.pose().mulPose(pose)
+            Lighting.setupForEntityInInventory()
+            val entityRenderDispatcher = Minecraft.getInstance().entityRenderDispatcher
+            if (cameraOrientation != null) {
+                entityRenderDispatcher.overrideCameraOrientation(
+                    cameraOrientation.conjugate(Quaternionf()).rotateY(Math.PI.toFloat())
+                )
+            }
+            entityRenderDispatcher.setRenderShadow(false)
+            RenderSystem.runAsFancy {
+                entityRenderDispatcher.render(
+                    entity,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0f,
+                    1.0f,
+                    guiGraphics.pose(),
+                    guiGraphics.bufferSource() as MultiBufferSource,
+                    0xF000F0
+                )
+            }
+            guiGraphics.flush()
+            entityRenderDispatcher.setRenderShadow(true)
+            guiGraphics.pose().popPose()
+            Lighting.setupFor3DItems()
         }
     }
 
