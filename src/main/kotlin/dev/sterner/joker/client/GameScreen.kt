@@ -12,7 +12,7 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import org.joml.Quaternionf
 import org.joml.Vector3f
@@ -53,6 +53,13 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.render(guiGraphics, mouseX, mouseY, partialTick)
+        val quaternionf = Quaternionf().rotateZ(Math.PI.toFloat())
+        val quaternionf2 = Quaternionf().rotateX(1 * (Math.PI.toFloat() / 180))
+        quaternionf.mul(quaternionf2)
+        var entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level)
+
+        renderEntityInInventory(guiGraphics, mouseX.toFloat(), mouseY.toFloat(), 10f, Vector3f(1f,1f,1f), quaternionf, quaternionf2, entity!!)
+
     }
 
     override fun renderBackground(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -102,7 +109,7 @@ class GameScreen(component: Component) : Screen(component) {
             translate: Vector3f,
             pose: Quaternionf?,
             cameraOrientation: Quaternionf?,
-            entity: LivingEntity
+            entity: Entity
         ) {
             guiGraphics.pose().pushPose()
             guiGraphics.pose().translate(x.toDouble(), y.toDouble(), 50.0)
