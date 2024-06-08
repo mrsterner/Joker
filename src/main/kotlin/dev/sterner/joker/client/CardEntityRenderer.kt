@@ -39,17 +39,23 @@ class CardEntityRenderer(context: EntityRendererProvider.Context) : EntityRender
         val gameTime = Minecraft.getInstance().level!!.gameTime
 
 
-        val i: Float = (gameTime + partialTick) / 500f
-        poseStack.mulPose(Axis.YP.rotation(i))
+        val i: Float = (gameTime + partialTick) / 20f
 
+        poseStack.translate((31 / 16f) / 2f,(45f / 16f) / 1.15f,0f)
+        poseStack.mulPose(Axis.YP.rotation(i))
+        poseStack.scale(-1.0f, -1.0f, 1.0f)
         model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(getTextureLocation(entity))), packedLight, OverlayTexture.NO_OVERLAY)
-        poseStack.translate(0f,0f,-0.01f)
-        overlay_model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(JokerMod.id("textures/card/card_overlay.png"))), packedLight, OverlayTexture.NO_OVERLAY)
+        poseStack.translate(0f,0f,0.0f)
+        overlay_model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(getOverlayTextureLocation(entity))), packedLight, OverlayTexture.NO_OVERLAY)
 
         poseStack.popPose()
      }
 
     override fun getTextureLocation(entity: CardEntity): ResourceLocation {
-        return JokerMod.id("textures/card/texture.png")
+        return JokerMod.id("textures/card/base.png")
+    }
+
+    fun getOverlayTextureLocation(entity: CardEntity): ResourceLocation {
+        return JokerMod.id("textures/card/card_overlay.png")
     }
 }
