@@ -58,7 +58,7 @@ class GameScreen(component: Component) : Screen(component) {
         quaternionf.mul(quaternionf2)
         var entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level)
 
-        renderEntityInInventory(guiGraphics, mouseX.toFloat(), mouseY.toFloat(), 10f, Vector3f(1f,1f,1f), quaternionf, quaternionf2, entity!!)
+        renderEntityInInventory(guiGraphics, mouseX.toFloat(), mouseY.toFloat(), 16f, Vector3f(1f,1f,1f), quaternionf, quaternionf2, entity!!)
 
     }
 

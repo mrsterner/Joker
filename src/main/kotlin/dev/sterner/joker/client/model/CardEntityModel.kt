@@ -39,21 +39,11 @@ class CardEntityModel<T : Entity>(root: ModelPart) : EntityModel<T>() {
             val meshdefinition = MeshDefinition()
             val partdefinition = meshdefinition.root
 
-            val bone = partdefinition.addOrReplaceChild(
-                "bone",
-                CubeListBuilder.create()
-                    .texOffs(0, 0)
-                    .addBox(-29.0f, -44.0f, -1.0f, 29.0f, 43.0f, 1.0f, CubeDeformation(0.0f))
-                    .texOffs(4, 48)
-                    .addBox(0.0f, -43.0f, -1.0f, 1.0f, 41.0f, 1.0f, CubeDeformation(0.0f))
-                    .texOffs(0, 48)
-                    .addBox(-30.0f, -43.0f, -1.0f, 1.0f, 41.0f, 1.0f, CubeDeformation(0.0f))
-                    .texOffs(0, 46)
-                    .addBox(-28.0f, -1.0f, -1.0f, 27.0f, 1.0f, 1.0f, CubeDeformation(0.0f))
-                    .texOffs(0, 44)
-                    .addBox(-28.0f, -45.0f, -1.0f, 27.0f, 1.0f, 1.0f, CubeDeformation(0.0f)),
-                PartPose.offset(0.0f, 24.0f, 0.0f)
-            )
+            var bone = partdefinition.addOrReplaceChild("bone", CubeListBuilder.create().texOffs(1, 1).addBox(-14.5F, -21.5F, 0.0F, 29.0F, 43.0F, 0.0F, CubeDeformation(0.0F))
+                .texOffs(5, 49).addBox(14.5F, -20.5F, 0.0F, 1.0F, 41.0F, 0.0F, CubeDeformation(0.0F))
+                .texOffs(1, 49).addBox(-15.5F, -20.5F, 0.0F, 1.0F, 41.0F, 0.0F, CubeDeformation(0.0F))
+                .texOffs(1, 47).addBox(-13.5F, 21.5F, 0.0F, 27.0F, 1.0F, 0.0F, CubeDeformation(0.0F))
+                .texOffs(1, 45).addBox(-13.5F, -22.5F, 0.0F, 27.0F, 1.0F, 0.0F, CubeDeformation(0.0F)), PartPose.offset(-14.5F, 1.5F, 0.0F));
 
             return LayerDefinition.create(meshdefinition, 128, 128)
         }

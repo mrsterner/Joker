@@ -37,10 +37,13 @@ class CardEntityRenderer(context: EntityRendererProvider.Context) : EntityRender
 
         poseStack.pushPose()
         val gameTime = Minecraft.getInstance().level!!.gameTime
-        val rotationAngle = (gameTime % 360) * (360.0f / 500.0f) // Assuming one full rotation in a Minecraft day (24000 ticks)
-        poseStack.mulPose(Axis.YP.rotationDegrees(rotationAngle))
-        model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(getTextureLocation(entity))), packedLight, OverlayTexture.NO_OVERLAY)
 
+
+        val i: Float = (gameTime + partialTick) / 500f
+        poseStack.mulPose(Axis.YP.rotation(i))
+
+        model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(getTextureLocation(entity))), packedLight, OverlayTexture.NO_OVERLAY)
+        poseStack.translate(0f,0f,-0.01f)
         overlay_model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(JokerMod.id("textures/card/card_overlay.png"))), packedLight, OverlayTexture.NO_OVERLAY)
 
         poseStack.popPose()

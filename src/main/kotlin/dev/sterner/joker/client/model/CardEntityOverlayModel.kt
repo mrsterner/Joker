@@ -7,12 +7,9 @@ import net.minecraft.client.model.EntityModel
 import net.minecraft.client.model.geom.ModelLayerLocation
 import net.minecraft.client.model.geom.ModelPart
 import net.minecraft.client.model.geom.PartPose
-import net.minecraft.client.model.geom.builders.CubeDeformation
-import net.minecraft.client.model.geom.builders.CubeListBuilder
-import net.minecraft.client.model.geom.builders.LayerDefinition
-import net.minecraft.client.model.geom.builders.MeshDefinition
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.client.model.geom.builders.*
 import net.minecraft.world.entity.Entity
+
 
 class CardEntityOverlayModel<T : Entity>(root: ModelPart) : EntityModel<T>() {
 
@@ -43,9 +40,8 @@ class CardEntityOverlayModel<T : Entity>(root: ModelPart) : EntityModel<T>() {
 
             partDefinition.addOrReplaceChild(
                 "bb_main",
-                CubeListBuilder.create()
-                    .texOffs(0, 0)
-                    .addBox(-30.0f, -45.0f, -1.0f, 31.0f, 45.0f, 2.0f, CubeDeformation(0.0f)),
+                CubeListBuilder.create().texOffs(1, 1)
+                    .addBox(-30.0f, -45.0f, -0.5f, 31.0f, 45.0f, 1.0f, CubeDeformation(0.0f)),
                 PartPose.offset(0.0f, 24.0f, 0.0f)
             )
 
