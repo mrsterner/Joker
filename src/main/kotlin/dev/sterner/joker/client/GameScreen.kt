@@ -116,7 +116,7 @@ class GameScreen(component: Component) : Screen(component) {
             guiGraphics.pose().scale(scale, scale, -scale)
             guiGraphics.pose().translate(translate.x, translate.y, translate.z)
             guiGraphics.pose().mulPose(pose)
-            Lighting.setupForEntityInInventory()
+            Lighting.setupLevel()
             val entityRenderDispatcher = Minecraft.getInstance().entityRenderDispatcher
             if (cameraOrientation != null) {
                 entityRenderDispatcher.overrideCameraOrientation(
