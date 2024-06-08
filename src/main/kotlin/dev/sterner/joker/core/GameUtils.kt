@@ -87,6 +87,11 @@ object GameUtils {
 
     fun writeCardToTag(card: Card) : CompoundTag {
         val tag = CompoundTag()
+        writeCardToTag(card, tag)
+        return tag
+    }
+
+    fun writeCardToTag(card: Card, tag: CompoundTag) : CompoundTag {
         tag.putString(Constants.Nbt.SUIT, card.suit.name)
         tag.putString(Constants.Nbt.RANK, card.rank.name)
         tag.putString(Constants.Nbt.SPECIAL, card.special.name)

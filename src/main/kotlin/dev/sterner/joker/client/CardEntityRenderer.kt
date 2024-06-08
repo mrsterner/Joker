@@ -62,7 +62,10 @@ class CardEntityRenderer(context: EntityRendererProvider.Context) : EntityRender
     }
 
     fun getFrontOverlayTexture(entity: CardEntity): ResourceLocation {
-        return JokerMod.id("textures/card/front_overlay/ace_of_hearts.png")
+        if (entity.card != null) {
+            return JokerMod.id("textures/card/front_overlay/" + entity.getCardName(entity.card!!) + ".png")
+        }
+        return JokerMod.id("textures/card/front_overlay/ace_of_spades.png")
     }
 
     fun getCardFrontTexture(entity: CardEntity): ResourceLocation {
