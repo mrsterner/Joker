@@ -38,8 +38,7 @@ class CardEntityOverlayModel<T : Entity>(root: ModelPart) : EntityModel<T>() {
             val meshDefinition = MeshDefinition()
             val partdefinition = meshDefinition.root
 
-            var bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create().texOffs(1, 1).addBox(-15.5F, -22.5F, -0.5F, 31.0F, 45.0F, 1.0F, CubeDeformation(0.1F)), PartPose.offset(0.0F, 24.0F, 0.0F))
-
+            var bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create().texOffs(0, 0).addBox(-15.5F, -22.5F, -0.5F, 31.0F, 45.0F, 0.0F, CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
             return LayerDefinition.create(meshDefinition, 128, 128)
         }
     }

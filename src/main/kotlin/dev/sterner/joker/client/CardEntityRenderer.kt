@@ -17,11 +17,11 @@ import net.minecraft.resources.ResourceLocation
 
 class CardEntityRenderer(context: EntityRendererProvider.Context) : EntityRenderer<CardEntity>(context) {
 
-    var model: EntityModel<CardEntity>? = null
+    //var model: EntityModel<CardEntity>? = null
     var overlay_model: EntityModel<CardEntity>? = null
 
     init {
-        model = CardEntityModel(context.bakeLayer(CardEntityModel.LAYER_LOCATION))
+        //model = CardEntityModel(context.bakeLayer(CardEntityModel.LAYER_LOCATION))
         overlay_model = CardEntityOverlayModel(context.bakeLayer(CardEntityOverlayModel.LAYER_LOCATION))
     }
 
@@ -44,18 +44,39 @@ class CardEntityRenderer(context: EntityRendererProvider.Context) : EntityRender
         poseStack.translate((31 / 16f) / 2f,(45f / 16f) / 1.15f,0f)
         poseStack.mulPose(Axis.YP.rotation(i))
         poseStack.scale(-1.0f, -1.0f, 1.0f)
-        model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(getTextureLocation(entity))), packedLight, OverlayTexture.NO_OVERLAY)
-        poseStack.translate(0f,0f,0.0f)
-        overlay_model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(getOverlayTextureLocation(entity))), packedLight, OverlayTexture.NO_OVERLAY)
+
+        renderCard(entity, poseStack, buffer, partialTick, packedLight)
 
         poseStack.popPose()
      }
+
+    fun renderCard(entity: CardEntity, poseStack: PoseStack, buffer: MultiBufferSource, partialTick: Float, packedLight: Int){
+        overlay_model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(getBackTexture(entity))), packedLight, OverlayTexture.NO_OVERLAY)
+        poseStack.translate(0f,0f,0.01f)
+        overlay_model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(getCardBackTexture(entity))), packedLight, OverlayTexture.NO_OVERLAY)
+        poseStack.translate(0f,0f,0.01f)
+        overlay_model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(getCardFrontTexture(entity))), packedLight, OverlayTexture.NO_OVERLAY)
+        poseStack.translate(0f,0f,0.01f)
+        overlay_model?.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(getFaceTexture(entity))), packedLight, OverlayTexture.NO_OVERLAY)
+    }
 
     override fun getTextureLocation(entity: CardEntity): ResourceLocation {
         return JokerMod.id("textures/card/base.png")
     }
 
-    fun getOverlayTextureLocation(entity: CardEntity): ResourceLocation {
-        return JokerMod.id("textures/card/card_overlay.png")
+    fun getFaceTexture(entity: CardEntity): ResourceLocation {
+        return JokerMod.id("textures/card/ace_of_hearts.png")
+    }
+
+    fun getCardFrontTexture(entity: CardEntity): ResourceLocation {
+        return JokerMod.id("textures/card/base.png")
+    }
+
+    fun getCardBackTexture(entity: CardEntity): ResourceLocation {
+        return JokerMod.id("textures/card/back.png")
+    }
+
+    fun getBackTexture(entity: CardEntity): ResourceLocation {
+        return JokerMod.id("textures/card/back_overlay.png")
     }
 }
