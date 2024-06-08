@@ -69,6 +69,10 @@ class CardEntityRenderer(context: EntityRendererProvider.Context) : EntityRender
     }
 
     fun getCardFrontTexture(entity: CardEntity): ResourceLocation {
+        if (entity.card != null) {
+            //NONE, WILD, LUCKY, STEEL, GOLD
+            return JokerMod.id("textures/card/base/" + entity.getBaseName(entity.card!!) + ".png")
+        }
         return JokerMod.id("textures/card/base/base.png")
     }
 
