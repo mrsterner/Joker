@@ -10,7 +10,9 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.Level
 
-class CardEntity(level: Level) : Entity(JokerMod.CARD_ENTITY, level) {
+class CardEntity(entity: EntityType<*>, level: Level) : Entity(JokerMod.CARD_ENTITY, level) {
+
+    constructor(level: Level): this(JokerMod.CARD_ENTITY, level)
 
     var card: Card? = null
 

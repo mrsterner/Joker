@@ -4,7 +4,8 @@ import com.mojang.blaze3d.platform.Lighting
 import com.mojang.blaze3d.systems.RenderSystem
 import dev.sterner.joker.JokerMod
 import dev.sterner.joker.component.JokerComponents
-import dev.sterner.joker.core.Card
+import dev.sterner.joker.core.*
+import dev.sterner.joker.game.CardEntity
 import net.minecraft.client.GameNarrator
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
@@ -16,19 +17,46 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import org.joml.Quaternionf
 import org.joml.Vector3f
+import java.awt.Point
 
 
 class GameScreen(component: Component) : Screen(component) {
 
     var player: Player? = null
-    var deck: MutableList<Card>? = null
+    var hand: MutableList<CardScreenObject>? = null
     val BACKGROUND_TEXTURE: ResourceLocation = JokerMod.id("textures/gui/balabg.png")
     protected var imageWidth: Int = 415
     protected var imageHeight: Int = 212
 
     constructor(player: Player) : this(GameNarrator.NO_TITLE) {
         this.player = player
-        this.deck = JokerComponents.DECK.get(player).deck
+        var obj = CardScreenObject()
+
+        this.hand = makeHand()
+    }
+
+    fun makeHand(): MutableList<CardScreenObject> {
+        val scaledY = (this.height - this.imageHeight) / 2
+        val scaledX = (this.width - this.imageWidth) / 2
+
+        //scaledY + this.imageHeight
+        var list = mutableListOf<CardScreenObject>()
+
+
+        var point = calculateEquallySpacedPoints(this.width + 150, 5)
+        for (i in point) {
+            //var entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level)
+            list.add(makeCardScreenObject(Card(Suit.CLUBS, Rank.ACE, Special.NONE, Stamp.NONE), i, 50))
+        }
+
+        return list
+    }
+
+    fun makeCardScreenObject(card: Card, x: Int, y: Int): CardScreenObject {
+        val obj = CardScreenObject()
+        obj.card = card
+        obj.centerPoint = Point(x, y)
+        return obj
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
@@ -58,8 +86,31 @@ class GameScreen(component: Component) : Screen(component) {
         quaternionf.mul(quaternionf2)
         var entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level)
 
-        renderEntityInInventory(guiGraphics, mouseX.toFloat(), mouseY.toFloat(), 16f, Vector3f(1f,1f,1f), quaternionf, quaternionf2, entity!!)
+        val scaledX = (this.width - this.imageWidth) / 2
+        val scaledY = (this.height - this.imageHeight) / 2
 
+        renderEntityInInventory(guiGraphics, mouseX.toFloat(), mouseY.toFloat(), 16f, Vector3f(1f,1f,1f), quaternionf, entity!!)
+        for (card in hand!!) {
+
+            var cardEntity: CardEntity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level)!!
+            cardEntity.card = card.card
+            //var pos = Vector3f(card.centerPoint!!.x.toFloat(), card.centerPoint!!.y.toFloat(), 0f)
+            renderEntityInInventory(guiGraphics, card.centerPoint!!.x.toFloat(), card.centerPoint!!.y.toFloat(), 16f, Vector3f(0f,0f,0f), quaternionf, cardEntity)
+            println("${card.centerPoint!!.x.toFloat()}" + "${card.centerPoint!!.y.toFloat()}")
+        }
+    }
+
+    fun calculateEquallySpacedPoints(width: Int, n: Int): List<Int> {
+        if (n <= 1) throw IllegalArgumentException("Number of points must be greater than 1")
+
+        val spacing = width / (n - 1)
+
+        val points = mutableListOf<Int>()
+        for (i in 0 until n) {
+            points.add(i * spacing)
+        }
+
+        return points
     }
 
     override fun renderBackground(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -68,16 +119,16 @@ class GameScreen(component: Component) : Screen(component) {
     }
 
     fun renderBg(guiGraphics: GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {
-        val i = (this.width - this.imageWidth) / 2
-        val j = (this.height - this.imageHeight) / 2
+        val scaledX = (this.width - this.imageWidth) / 2
+        val scaledY = (this.height - this.imageHeight) / 2
 
         //Draw transparent line on top of gui, and bottom
-        guiGraphics.fillGradient(0, j - 3, this.width, j, -1072689136, -804253680)
-        guiGraphics.fillGradient(0, j + this.imageHeight, this.width, j + this.imageHeight + 3, -1072689136, -804253680)
+        guiGraphics.fillGradient(0, scaledY - 3, this.width, scaledY, -1072689136, -804253680)
+        guiGraphics.fillGradient(0, scaledY + this.imageHeight, this.width, scaledY + this.imageHeight + 3, -1072689136, -804253680)
 
         //Draw texture
         guiGraphics.blit(
-            this.BACKGROUND_TEXTURE, i, j, 0, 0.0f, 0.0f,
+            this.BACKGROUND_TEXTURE, scaledX, scaledY, 0, 0.0f, 0.0f,
             this.imageWidth,
             this.imageHeight, 512, 256
         )
@@ -108,7 +159,6 @@ class GameScreen(component: Component) : Screen(component) {
             scale: Float,
             translate: Vector3f,
             pose: Quaternionf?,
-            cameraOrientation: Quaternionf?,
             entity: Entity
         ) {
             guiGraphics.pose().pushPose()
@@ -118,11 +168,7 @@ class GameScreen(component: Component) : Screen(component) {
             guiGraphics.pose().mulPose(pose)
             Lighting.setupLevel()
             val entityRenderDispatcher = Minecraft.getInstance().entityRenderDispatcher
-            if (cameraOrientation != null) {
-                entityRenderDispatcher.overrideCameraOrientation(
-                    cameraOrientation.conjugate(Quaternionf()).rotateY(Math.PI.toFloat())
-                )
-            }
+
             entityRenderDispatcher.setRenderShadow(false)
             RenderSystem.runAsFancy {
                 entityRenderDispatcher.render(
