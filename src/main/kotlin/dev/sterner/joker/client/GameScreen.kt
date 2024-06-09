@@ -23,6 +23,12 @@ class GameScreen(component: Component) : Screen(component) {
     protected var imageWidth: Int = 415
     protected var imageHeight: Int = 212
 
+    var draggingObject: CardScreenObject? = null
+    var offsetX = 0.0
+    var offsetY = 0.0
+
+    var handSize = 8
+
     constructor(player: Player) : this(GameNarrator.NO_TITLE) {
         this.player = player
 
@@ -39,7 +45,7 @@ class GameScreen(component: Component) : Screen(component) {
     fun makeHand(): MutableList<CardScreenObject> {
         val list = mutableListOf<CardScreenObject>()
 
-        val point = calculateEquallySpacedPoints(this.width / 2, 5)
+        val point = calculateEquallySpacedPoints(this.width / 2)
         for (i in point) {
             val pos = Vector3i(48 + i, this.height - 100, 0)
             list.add(makeCardScreenObject(Card(Suit.entries.random(), Rank.entries.random(), Special.NONE, Stamp.NONE), pos))
@@ -64,10 +70,6 @@ class GameScreen(component: Component) : Screen(component) {
         }
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
-
-    var draggingObject: CardScreenObject? = null
-    var offsetX = 0.0
-    var offsetY = 0.0
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (button == 0) {
@@ -97,12 +99,28 @@ class GameScreen(component: Component) : Screen(component) {
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        var vec = draggingObject!!.centerPoint
-        draggingObject!!.centerPoint = Vector3i(vec.x, vec.y, 0)
-        draggingObject = null
+        if (draggingObject != null) {
+            val vec = draggingObject!!.centerPoint
+            draggingObject!!.centerPoint = Vector3i(vec.x, vec.y, 0)
+            draggingObject = null
+        }
+
         offsetX = 0.0
         offsetY = 0.0
+        reorderHand()
         return super.mouseReleased(mouseX, mouseY, button)
+    }
+
+    private fun reorderHand() {
+        hand?.sortBy { it.centerPoint.x }
+        val point: List<Int> = calculateEquallySpacedPoints(this.width / 2)
+        for (i in point.indices) {
+            val x = point[i]
+            val obj = hand!!.get(i)
+            val pos = Vector3i(48 + x, this.height - 100, 0)
+            obj.centerPoint = pos
+
+        }
     }
 
     override fun tick() {
@@ -121,13 +139,11 @@ class GameScreen(component: Component) : Screen(component) {
         }
     }
 
-    fun calculateEquallySpacedPoints(width: Int, n: Int): List<Int> {
-        if (n <= 1) throw IllegalArgumentException("Number of points must be greater than 1")
-
-        val spacing = width / (n - 1)
+    fun calculateEquallySpacedPoints(width: Int): List<Int> {
+        val spacing = width / (handSize - 1)
 
         val points = mutableListOf<Int>()
-        for (i in 0 until n) {
+        for (i in 0 until handSize) {
             points.add(i * spacing)
         }
 
