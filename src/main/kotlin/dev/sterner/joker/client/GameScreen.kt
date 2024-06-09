@@ -30,8 +30,6 @@ class GameScreen(component: Component) : Screen(component) {
 
     constructor(player: Player) : this(GameNarrator.NO_TITLE) {
         this.player = player
-        var obj = CardScreenObject()
-
         this.hand = makeHand()
     }
 
@@ -54,7 +52,9 @@ class GameScreen(component: Component) : Screen(component) {
 
     fun makeCardScreenObject(card: Card, x: Int, y: Int): CardScreenObject {
         val obj = CardScreenObject()
-        obj.card = card
+        var entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level)
+        entity!!.card = card
+        obj.card = entity
         obj.centerPoint = Point(x, y)
         return obj
     }
@@ -67,11 +67,42 @@ class GameScreen(component: Component) : Screen(component) {
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
 
+    var draggingObject: CardScreenObject? = null
+    var offsetX = 0.0
+    var offsetY = 0.0
+
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
         if (button == 0) {
+            if (draggingObject == null) {
+                for (obj in hand!!) {
+                    val x = obj.centerPoint!!.x
+                    val y = obj.centerPoint!!.y
 
+                    if (mouseX < x + (obj.width!! / 4) && mouseX > x - (obj.width!!)) {
+                        if (mouseY < y + (obj.height / 4) && mouseY > y - (obj.height)) {
+                            draggingObject = obj
+                            offsetX = mouseX - x
+                            offsetY = mouseY - y
+                            break
+                        }
+                    }
+                }
+            }
+
+            draggingObject?.let {
+                it.centerPoint = Point((mouseX - offsetX).toInt(), (mouseY - offsetY).toInt())
+            }
+        } else {
+            draggingObject = null
         }
         return false
+    }
+
+    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        draggingObject = null
+        offsetX = 0.0
+        offsetY = 0.0
+        return super.mouseReleased(mouseX, mouseY, button)
     }
 
     override fun tick() {
@@ -89,14 +120,12 @@ class GameScreen(component: Component) : Screen(component) {
         val scaledX = (this.width - this.imageWidth) / 2
         val scaledY = (this.height - this.imageHeight) / 2
 
-        renderEntityInInventory(guiGraphics, mouseX.toFloat(), mouseY.toFloat(), 16f, Vector3f(1f,1f,1f), quaternionf, entity!!)
+        //renderEntityInInventory(guiGraphics, mouseX.toFloat(), mouseY.toFloat(), 16f, Vector3f(1f,1f,1f), quaternionf, entity!!)
         for (card in hand!!) {
 
-            var cardEntity: CardEntity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level)!!
-            cardEntity.card = card.card
             //var pos = Vector3f(card.centerPoint!!.x.toFloat(), card.centerPoint!!.y.toFloat(), 0f)
-            renderEntityInInventory(guiGraphics, card.centerPoint!!.x.toFloat(), card.centerPoint!!.y.toFloat(), 16f, Vector3f(0f,0f,0f), quaternionf, cardEntity)
-            println("${card.centerPoint!!.x.toFloat()}" + "${card.centerPoint!!.y.toFloat()}")
+            renderEntityInInventory(guiGraphics, card.centerPoint!!.x.toFloat(), card.centerPoint!!.y.toFloat(), 16f, Vector3f(0f,0f,0f), quaternionf, card.card!!)
+            //println("${card.centerPoint!!.x.toFloat()}" + "${card.centerPoint!!.y.toFloat()}")
         }
     }
 
