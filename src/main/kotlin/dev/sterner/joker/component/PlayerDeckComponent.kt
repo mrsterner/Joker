@@ -28,7 +28,7 @@ class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, CommonTicki
 
     var gameLoop: GameLoop = GameLoop(this)
 
-    fun getGameDeck(): MutableList<Card> {
+    fun gameDeck(): MutableList<Card> {
         if (deck.isEmpty()) {
             val deck = GameUtils.createStandardDeck()
             deck.shuffle()
@@ -40,6 +40,7 @@ class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, CommonTicki
 
     override fun tick() {
         if (gameOn) {
+            println("TICK")
             gameLoop.tick()
         } else {
             gameLoop.reset()

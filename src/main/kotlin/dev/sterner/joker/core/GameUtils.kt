@@ -188,7 +188,7 @@ object GameUtils {
         val entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level!!)
         entity!!.card = card
         obj.cardEntity = entity
-        obj.centerPoint = pos
+        obj.centerPos = pos
         return obj
     }
 

@@ -1,20 +1,22 @@
 package dev.sterner.joker.client
 
 import dev.sterner.joker.JokerMod
+import dev.sterner.joker.client.widget.StartGameWidget
 import dev.sterner.joker.component.JokerComponents
 import dev.sterner.joker.core.*
 import dev.sterner.joker.game.GameLoop
+import dev.sterner.joker.networking.c2s.StartGameButtonPacket
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.GameNarrator
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Player
 import org.joml.Quaternionf
-import org.joml.Vector3f
 import org.joml.Vector3i
-import java.awt.Point
 
 
 class GameScreen(component: Component) : Screen(component) {
@@ -41,14 +43,19 @@ class GameScreen(component: Component) : Screen(component) {
 
         val components = JokerComponents.DECK.get(player)
         this.handSize = components.handSize
-        this.deck = components.getGameDeck()
+        this.deck = components.gameDeck()
         this.gameLoop = components.gameLoop
     }
 
     override fun init() {
         //TODO obviously remove this
         //this.hand = makeHand()
-        addWidget()
+        val scaledX = (this.width - this.imageWidth) / 2
+        val scaledY = (this.height - this.imageHeight) / 2
+
+        val wig = StartGameWidget(64, 64, 18, 18, Component.literal("Hello"))
+
+        this.addRenderableWidget(wig)
     }
 
     /*

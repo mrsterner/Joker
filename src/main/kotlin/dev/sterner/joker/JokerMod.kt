@@ -4,18 +4,25 @@ import com.mojang.blaze3d.platform.InputConstants
 import dev.sterner.joker.client.CardEntityRenderer
 import dev.sterner.joker.client.GameScreen
 import dev.sterner.joker.client.model.CardEntityModel
+import dev.sterner.joker.component.JokerComponents
 import dev.sterner.joker.game.CardEntity
+import dev.sterner.joker.networking.JokerNetworking
+import dev.sterner.joker.networking.c2s.StartGameButtonPacket
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.Minecraft
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.MobCategory
@@ -33,10 +40,10 @@ object JokerMod : ModInitializer, ClientModInitializer {
 
 	override fun onInitialize() {
 		Registry.register(BuiltInRegistries.ENTITY_TYPE, "card_entity", CARD_ENTITY)
-	}
 
-	fun id(name: String) : ResourceLocation {
-		return ResourceLocation.fromNamespaceAndPath(id, name)
+		JokerNetworking.init()
+
+
 	}
 
 	override fun onInitializeClient() {
@@ -59,5 +66,27 @@ object JokerMod : ModInitializer, ClientModInitializer {
 				GameScreen.openScreen(client.player!!)
 			}
 		})
+
+		PayloadTypeRegistry.playS2C().register(StartGameButtonPacket.TYPE, StartGameButtonPacket.STREAM_CODEC)
+		PayloadTypeRegistry.playC2S().register(StartGameButtonPacket.TYPE, StartGameButtonPacket.STREAM_CODEC)
+
+
+		ServerPlayNetworking.registerGlobalReceiver(StartGameButtonPacket.TYPE) { packet, ctx ->
+			ctx.player().server.execute {
+				println("HELLO")
+				var component = JokerComponents.DECK.get(ctx.player())
+				component.gameOn = true
+				JokerComponents.DECK.sync(ctx.player())
+			}
+		}
+	}
+
+	fun id(name: String) : ResourceLocation {
+		return ResourceLocation.fromNamespaceAndPath(id, name)
+	}
+
+	fun logInitialization() {
+		val logger = LoggerFactory.getLogger(this::class.java)
+		logger.info("${this::class.java.simpleName} initialized")
 	}
 }
