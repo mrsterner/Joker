@@ -7,7 +7,7 @@ import java.awt.Point
 
 class CardScreenObject {
     var centerPoint: Vector3i = Vector3i(0,0,0)
-    var card: CardEntity? = null
+    var cardEntity: CardEntity? = null
     var width: Int? = 31
     var height = 45
 }

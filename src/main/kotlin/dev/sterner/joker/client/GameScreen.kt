@@ -28,39 +28,29 @@ class GameScreen(component: Component) : Screen(component) {
     var offsetY = 0.0
 
     var handSize = 8
+    var handLevelY = 30
+    var handLevelX = 128 + 32
 
     constructor(player: Player) : this(GameNarrator.NO_TITLE) {
         this.player = player
-
     }
 
     override fun init() {
-        super.init()
-        this.minecraft = Minecraft.getInstance()
-        this.width = minecraft!!.window.getGuiScaledWidth()
-        this.height = minecraft!!.window.getGuiScaledHeight()
+        //TODO obviously remove this
         this.hand = makeHand()
     }
 
-    fun makeHand(): MutableList<CardScreenObject> {
+    private fun makeHand(): MutableList<CardScreenObject> {
         val list = mutableListOf<CardScreenObject>()
 
-        val point = calculateEquallySpacedPoints(this.width / 2)
-        for (i in point) {
-            val pos = Vector3i(48 + i, this.height - 100, 0)
-            list.add(makeCardScreenObject(Card(Suit.entries.random(), Rank.entries.random(), Special.NONE, Stamp.NONE), pos))
+        val point = calculateEquallySpacedPoints()
+        for ((j, i) in point.withIndex()) {
+
+            val pos = Vector3i(handLevelX + i, this.height - handLevelY, j)
+            list.add(GameUtils.makeCardScreenObject(Card(Suit.entries.random(), Rank.entries.random(), Special.NONE, Stamp.NONE), pos))
         }
 
         return list
-    }
-
-    fun makeCardScreenObject(card: Card, pos: Vector3i): CardScreenObject {
-        val obj = CardScreenObject()
-        val entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level!!)
-        entity!!.card = card
-        obj.card = entity
-        obj.centerPoint = pos
-        return obj
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
@@ -73,18 +63,28 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (button == 0) {
-            for (obj in hand!!) {
-                val x = obj.centerPoint!!.x
-                val y = obj.centerPoint!!.y
+            var highestZObject: CardScreenObject? = null
+            var highestZ = Int.MIN_VALUE
 
-                if (mouseX < x + (obj.width!! / 4) && mouseX > x - (obj.width!!)) {
-                    if (mouseY < y + (obj.height / 4) && mouseY > y - (obj.height)) {
-                        draggingObject = obj
-                        offsetX = mouseX - x
-                        offsetY = mouseY - y
-                        break
+            for (obj in hand!!) {
+                val x = obj.centerPoint.x
+                val y = obj.centerPoint.y
+
+                if (mouseX < x + (obj.width!! / 6) && mouseX > x - (obj.width!!)) {
+                    if (mouseY < y + (obj.height / 6) && mouseY > y - (obj.height)) {
+                        if (obj.centerPoint.z > highestZ) {
+                            highestZObject = obj
+                            highestZ = obj.centerPoint.z
+                        }
                     }
                 }
+            }
+
+            // If a card with the highest z-coordinate is found, set it as the dragging object
+            if (highestZObject != null) {
+                draggingObject = highestZObject
+                offsetX = mouseX - highestZObject.centerPoint.x
+                offsetY = mouseY - highestZObject.centerPoint.y
             }
         }
         return false
@@ -92,8 +92,7 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
         if (button == 0 && draggingObject != null) {
-            val z = draggingObject!!.centerPoint.z
-            draggingObject!!.centerPoint = Vector3i((mouseX - offsetX).toInt(), minecraft!!.window.getGuiScaledHeight() - 100, 10)
+            draggingObject!!.centerPoint = Vector3i((mouseX - offsetX).toInt(), this.height - handLevelY, 10)
         }
         return false
     }
@@ -113,14 +112,19 @@ class GameScreen(component: Component) : Screen(component) {
 
     private fun reorderHand() {
         hand?.sortBy { it.centerPoint.x }
-        val point: List<Int> = calculateEquallySpacedPoints(this.width / 2)
-        for (i in point.indices) {
-            val x = point[i]
-            val obj = hand!!.get(i)
-            val pos = Vector3i(48 + x, this.height - 100, 0)
-            obj.centerPoint = pos
-
+        val point: List<Int> = calculateEquallySpacedPoints()
+        for ((j, i) in point.indices.withIndex()) {
+            val pos = Vector3i(handLevelX + point[i], this.height - handLevelY, j)
+            hand!![i].centerPoint = pos
         }
+    }
+
+    fun orderHandByRank() {
+        hand?.sortBy { it.cardEntity?.card?.rank }
+    }
+
+    fun orderHandBySuit() {
+        hand?.sortBy { it.cardEntity?.card?.suit }
     }
 
     override fun tick() {
@@ -134,12 +138,13 @@ class GameScreen(component: Component) : Screen(component) {
         val quaternionf2 = Quaternionf().rotateX(1 * (Math.PI.toFloat() / 180))
         quaternionf.mul(quaternionf2)
 
-        for (card in hand!!) {
-            GameUtils.renderCard(guiGraphics, card.centerPoint, 16f, quaternionf, card.card!!, partialTick)
+        for (cardObject in hand!!) {
+            GameUtils.renderCard(guiGraphics, cardObject.centerPoint, 16f, quaternionf, cardObject.cardEntity!!, partialTick)
         }
     }
 
-    fun calculateEquallySpacedPoints(width: Int): List<Int> {
+    fun calculateEquallySpacedPoints(): List<Int> {
+        val width = (this.width / 2.5).toInt()
         val spacing = width / (handSize - 1)
 
         val points = mutableListOf<Int>()

@@ -2,6 +2,8 @@ package dev.sterner.joker.core
 
 import com.mojang.blaze3d.platform.Lighting
 import com.mojang.blaze3d.systems.RenderSystem
+import dev.sterner.joker.JokerMod
+import dev.sterner.joker.client.CardScreenObject
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.renderer.MultiBufferSource
@@ -179,6 +181,15 @@ object GameUtils {
         entityRenderDispatcher.setRenderShadow(true)
         guiGraphics.pose().popPose()
         Lighting.setupFor3DItems()
+    }
+
+    fun makeCardScreenObject(card: Card, pos: Vector3i): CardScreenObject {
+        val obj = CardScreenObject()
+        val entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level!!)
+        entity!!.card = card
+        obj.cardEntity = entity
+        obj.centerPoint = pos
+        return obj
     }
 
     /** Game loop
