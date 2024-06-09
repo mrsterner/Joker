@@ -1,14 +1,106 @@
 package dev.sterner.joker.game
 
+import dev.sterner.joker.client.CardScreenObject
+import dev.sterner.joker.component.PlayerDeckComponent
 import dev.sterner.joker.core.*
+import net.fabricmc.api.EnvType
+import net.minecraft.client.Minecraft
+import org.joml.Vector3i
 
-class GameLoop {
+class GameLoop(val component: PlayerDeckComponent) {
 
-    private val game: GameStage = GameStage.CHOICE_PHASE
-    private val gameStageCounter: Int = 0
+    var gameStage: GameStage = GameStage.NONE
+    var gameStageCounter: Int = 0
+    var gameSubStageCounter: Int = 0
+
+    var screenHeight = Minecraft.getInstance().window.guiScaledHeight
+    var screenWidth = Minecraft.getInstance().window.guiScaledWidth
+
+    var hand: MutableList<CardScreenObject> = ArrayList()
+    var handLevelY = 30
+    var handLevelX = 128 + 32
 
     fun tick() {
+        if (gameStage == GameStage.NONE) {
+            println("None")
+            gameStageCounter++
+            val bl: Boolean = tickOnNone(component.gameDeck, component.handSize, component.totalHandSize, gameStageCounter)
+            if (bl && gameStageCounter >= gameStage.time) {
+                gameStageCounter = 0
+                gameStage = GameStage.CHOICE_PHASE
+            }
+        }
 
+        if (gameStage == GameStage.CHOICE_PHASE) {
+            println("Choice")
+            gameStageCounter++
+            tickOnChoice(component.gameDeck, component.handSize, component.totalHandSize, gameStageCounter)
+            if (gameStageCounter >= gameStage.time) {
+                gameStageCounter = 0
+                gameStage = GameStage.PLAY_PHASE
+            }
+        }
+    }
+
+    fun tickOnNone(gameDeck: MutableList<Card>, handSize: Int, totalHandSize: Int, gameStageCounter: Int): Boolean {
+
+        for (cardObject in hand) {
+            cardObject.tick(0.5f)
+        }
+
+        if (handSize < totalHandSize) {
+
+            val point = calculateEquallySpacedPoints(handSize)
+
+            val pos = Vector3i(handLevelX + point[handSize], this.screenHeight - handLevelY, handSize)
+
+            gameSubStageCounter++
+            if (gameSubStageCounter >= 20 * 2) {
+                gameSubStageCounter = 0
+                val card = component.pickRandomCardAndRemove(gameDeck)
+                val cardEntity = CardEntity(Minecraft.getInstance().level!!)
+                cardEntity.card = card
+                val cardScreenObject = CardScreenObject()
+                cardScreenObject.centerPos = Vector3i(30,30,0)
+                cardScreenObject.targetPos = pos
+                println("TargetPos: " + cardScreenObject.targetPos + " : " + handSize)
+                hand.add(cardScreenObject)
+            }
+        }
+
+        if (handSize == totalHandSize) {
+            return true
+        }
+
+
+        return false
+    }
+
+    fun tickOnChoice(gameDeck: MutableList<Card>, handSize: Int, totalHandSize: Int, gameStageCounter: Int): Boolean {
+
+
+        return true
+    }
+
+    fun reorderHand() {
+        hand?.sortBy { it.centerPos.x }
+        val point: List<Int> = calculateEquallySpacedPoints(component.handSize)
+        for ((j, i) in point.indices.withIndex()) {
+            val pos = Vector3i(handLevelX + point[i], this.screenHeight - handLevelY, j)
+            hand!![i].centerPos = pos
+        }
+    }
+
+    fun calculateEquallySpacedPoints(handSize: Int): List<Int> {
+        val width = (this.screenWidth / 2.5).toInt()
+        val spacing = width / (handSize - 1)
+
+        val points = mutableListOf<Int>()
+        for (i in 0 until handSize) {
+            points.add(i * spacing)
+        }
+
+        return points
     }
 
     fun sellCard(card: Card): JokerContext {
@@ -57,6 +149,13 @@ class GameLoop {
 
     fun checkSpecial(card: Card): JokerContext {
         return JokerContext()
+    }
+
+
+
+    fun reset() {
+        gameStage = GameStage.NONE
+        gameStageCounter = 0
     }
 
     /** Game loop
