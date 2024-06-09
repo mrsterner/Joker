@@ -71,29 +71,28 @@ class GameScreen(component: Component) : Screen(component) {
     var offsetX = 0.0
     var offsetY = 0.0
 
-    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (button == 0) {
-            if (draggingObject == null) {
-                for (obj in hand!!) {
-                    val x = obj.centerPoint!!.x
-                    val y = obj.centerPoint!!.y
+            for (obj in hand!!) {
+                val x = obj.centerPoint!!.x
+                val y = obj.centerPoint!!.y
 
-                    if (mouseX < x + (obj.width!! / 4) && mouseX > x - (obj.width!!)) {
-                        if (mouseY < y + (obj.height / 4) && mouseY > y - (obj.height)) {
-                            draggingObject = obj
-                            offsetX = mouseX - x
-                            offsetY = mouseY - y
-                            break
-                        }
+                if (mouseX < x + (obj.width!! / 4) && mouseX > x - (obj.width!!)) {
+                    if (mouseY < y + (obj.height / 4) && mouseY > y - (obj.height)) {
+                        draggingObject = obj
+                        offsetX = mouseX - x
+                        offsetY = mouseY - y
+                        break
                     }
                 }
             }
+        }
+        return false
+    }
 
-            draggingObject?.let {
-                it.centerPoint = Point((mouseX - offsetX).toInt(), (mouseY - offsetY).toInt())
-            }
-        } else {
-            draggingObject = null
+    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
+        if (button == 0 && draggingObject != null) {
+            draggingObject!!.centerPoint = Point((mouseX - offsetX).toInt(), (mouseY - offsetY).toInt())
         }
         return false
     }
