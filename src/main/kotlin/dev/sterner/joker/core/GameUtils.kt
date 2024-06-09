@@ -1,7 +1,16 @@
 package dev.sterner.joker.core
 
+import com.mojang.blaze3d.platform.Lighting
+import com.mojang.blaze3d.systems.RenderSystem
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
+import net.minecraft.world.entity.Entity
+import org.joml.Quaternionf
+import org.joml.Vector3f
+import org.joml.Vector3i
 import java.util.*
 
 object GameUtils {
@@ -135,6 +144,41 @@ object GameUtils {
         }
 
         return deck
+    }
+
+    fun renderCard(
+        guiGraphics: GuiGraphics,
+        pos: Vector3i,
+        scale: Float,
+        pose: Quaternionf?,
+        entity: Entity,
+        partialTick: Float
+    ) {
+        guiGraphics.pose().pushPose()
+        guiGraphics.pose().translate(pos.x.toDouble(), pos.y.toDouble(), 50.0 + pos.z.toDouble())
+        guiGraphics.pose().scale(scale, scale, -scale)
+        guiGraphics.pose().mulPose(pose)
+        Lighting.setupLevel()
+        val entityRenderDispatcher = Minecraft.getInstance().entityRenderDispatcher
+
+        entityRenderDispatcher.setRenderShadow(false)
+        RenderSystem.runAsFancy {
+            entityRenderDispatcher.render(
+                entity,
+                0.0,
+                0.0,
+                0.0,
+                0.0f,
+                partialTick,
+                guiGraphics.pose(),
+                guiGraphics.bufferSource() as MultiBufferSource,
+                0xF000F0
+            )
+        }
+        guiGraphics.flush()
+        entityRenderDispatcher.setRenderShadow(true)
+        guiGraphics.pose().popPose()
+        Lighting.setupFor3DItems()
     }
 
     /** Game loop

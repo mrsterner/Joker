@@ -39,8 +39,9 @@ class CardEntityRenderer(context: EntityRendererProvider.Context) : EntityRender
         val i: Float = (gameTime + partialTick) / 20f
 
         poseStack.translate((31 / 16f) / 2f,(45f / 16f) / 1.15f,0f)
-        poseStack.mulPose(Axis.YP.rotation(i))
-        poseStack.scale(-1.0f, -1.0f, 1.0f)
+        //poseStack.mulPose(Axis.YP.rotation(i))
+        poseStack.mulPose(Axis.YP.rotationDegrees(180f))
+        poseStack.scale(1.0f, -1.0f, 1.0f)
 
         renderCard(entity, poseStack, buffer, partialTick, packedLight)
 

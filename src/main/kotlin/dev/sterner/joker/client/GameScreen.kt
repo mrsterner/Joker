@@ -1,22 +1,17 @@
 package dev.sterner.joker.client
 
-import com.mojang.blaze3d.platform.Lighting
-import com.mojang.blaze3d.systems.RenderSystem
 import dev.sterner.joker.JokerMod
-import dev.sterner.joker.component.JokerComponents
 import dev.sterner.joker.core.*
-import dev.sterner.joker.game.CardEntity
 import net.minecraft.client.GameNarrator
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
-import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import org.joml.Quaternionf
 import org.joml.Vector3f
+import org.joml.Vector3i
 import java.awt.Point
 
 
@@ -30,32 +25,35 @@ class GameScreen(component: Component) : Screen(component) {
 
     constructor(player: Player) : this(GameNarrator.NO_TITLE) {
         this.player = player
+
+    }
+
+    override fun init() {
+        super.init()
+        this.minecraft = Minecraft.getInstance()
+        this.width = minecraft!!.window.getGuiScaledWidth()
+        this.height = minecraft!!.window.getGuiScaledHeight()
         this.hand = makeHand()
     }
 
     fun makeHand(): MutableList<CardScreenObject> {
-        val scaledY = (this.height - this.imageHeight) / 2
-        val scaledX = (this.width - this.imageWidth) / 2
+        val list = mutableListOf<CardScreenObject>()
 
-        //scaledY + this.imageHeight
-        var list = mutableListOf<CardScreenObject>()
-
-
-        var point = calculateEquallySpacedPoints(this.width + 150, 5)
+        val point = calculateEquallySpacedPoints(this.width / 2, 5)
         for (i in point) {
-            //var entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level)
-            list.add(makeCardScreenObject(Card(Suit.CLUBS, Rank.ACE, Special.NONE, Stamp.NONE), i, 50))
+            val pos = Vector3i(48 + i, this.height - 100, 0)
+            list.add(makeCardScreenObject(Card(Suit.entries.random(), Rank.entries.random(), Special.NONE, Stamp.NONE), pos))
         }
 
         return list
     }
 
-    fun makeCardScreenObject(card: Card, x: Int, y: Int): CardScreenObject {
+    fun makeCardScreenObject(card: Card, pos: Vector3i): CardScreenObject {
         val obj = CardScreenObject()
-        var entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level)
+        val entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level!!)
         entity!!.card = card
         obj.card = entity
-        obj.centerPoint = Point(x, y)
+        obj.centerPoint = pos
         return obj
     }
 
@@ -92,12 +90,15 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
         if (button == 0 && draggingObject != null) {
-            draggingObject!!.centerPoint = Point((mouseX - offsetX).toInt(), (mouseY - offsetY).toInt())
+            val z = draggingObject!!.centerPoint.z
+            draggingObject!!.centerPoint = Vector3i((mouseX - offsetX).toInt(), minecraft!!.window.getGuiScaledHeight() - 100, 10)
         }
         return false
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        var vec = draggingObject!!.centerPoint
+        draggingObject!!.centerPoint = Vector3i(vec.x, vec.y, 0)
         draggingObject = null
         offsetX = 0.0
         offsetY = 0.0
@@ -114,17 +115,9 @@ class GameScreen(component: Component) : Screen(component) {
         val quaternionf = Quaternionf().rotateZ(Math.PI.toFloat())
         val quaternionf2 = Quaternionf().rotateX(1 * (Math.PI.toFloat() / 180))
         quaternionf.mul(quaternionf2)
-        var entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level)
 
-        val scaledX = (this.width - this.imageWidth) / 2
-        val scaledY = (this.height - this.imageHeight) / 2
-
-        //renderEntityInInventory(guiGraphics, mouseX.toFloat(), mouseY.toFloat(), 16f, Vector3f(1f,1f,1f), quaternionf, entity!!)
         for (card in hand!!) {
-
-            //var pos = Vector3f(card.centerPoint!!.x.toFloat(), card.centerPoint!!.y.toFloat(), 0f)
-            renderEntityInInventory(guiGraphics, card.centerPoint!!.x.toFloat(), card.centerPoint!!.y.toFloat(), 16f, Vector3f(0f,0f,0f), quaternionf, card.card!!)
-            //println("${card.centerPoint!!.x.toFloat()}" + "${card.centerPoint!!.y.toFloat()}")
+            GameUtils.renderCard(guiGraphics, card.centerPoint, 16f, quaternionf, card.card!!, partialTick)
         }
     }
 
@@ -179,43 +172,5 @@ class GameScreen(component: Component) : Screen(component) {
             }
             return screen!!
         }
-
-        fun renderEntityInInventory(
-            guiGraphics: GuiGraphics,
-            x: Float,
-            y: Float,
-            scale: Float,
-            translate: Vector3f,
-            pose: Quaternionf?,
-            entity: Entity
-        ) {
-            guiGraphics.pose().pushPose()
-            guiGraphics.pose().translate(x.toDouble(), y.toDouble(), 50.0)
-            guiGraphics.pose().scale(scale, scale, -scale)
-            guiGraphics.pose().translate(translate.x, translate.y, translate.z)
-            guiGraphics.pose().mulPose(pose)
-            Lighting.setupLevel()
-            val entityRenderDispatcher = Minecraft.getInstance().entityRenderDispatcher
-
-            entityRenderDispatcher.setRenderShadow(false)
-            RenderSystem.runAsFancy {
-                entityRenderDispatcher.render(
-                    entity,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0f,
-                    1.0f,
-                    guiGraphics.pose(),
-                    guiGraphics.bufferSource() as MultiBufferSource,
-                    0xF000F0
-                )
-            }
-            guiGraphics.flush()
-            entityRenderDispatcher.setRenderShadow(true)
-            guiGraphics.pose().popPose()
-            Lighting.setupFor3DItems()
-        }
     }
-
 }
