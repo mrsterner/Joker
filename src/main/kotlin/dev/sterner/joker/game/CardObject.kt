@@ -3,12 +3,17 @@ package dev.sterner.joker.game
 import dev.sterner.joker.core.Card
 import dev.sterner.joker.core.Special
 import org.joml.Vector3i
+import kotlin.math.roundToInt
 
 class CardObject {
-    var isHolding: Boolean = false
+
+    var card: Card? = null
     val width: Int = 31
     val height: Int = 45
-    var card: Card? = null
+
+    var isHolding: Boolean = false
+    var isSelected: Boolean = false
+
     var screenPos = Vector3i(0,0,0)
     var targetScreenPos = Vector3i(0,0,0)
 
@@ -25,6 +30,7 @@ class CardObject {
 
     fun tick(fl: Float) {
         if (screenPos != targetScreenPos) {
+            //println("y: " + screenPos.y + ", z: " + screenPos.z)
             screenPos = lerp(screenPos, targetScreenPos, fl)
         }
     }
@@ -35,9 +41,9 @@ class CardObject {
 
     fun lerp(a: Vector3i, b: Vector3i, t: Float): Vector3i {
         val easedT = easeOut(t)
-        val x = a.x + (easedT * (b.x - a.x)).toInt()
-        val y = a.y + (easedT * (b.y - a.y)).toInt()
-        val z = a.z + (easedT * (b.z - a.z)).toInt()
+        val x = a.x + (easedT * (b.x - a.x)).roundToInt()
+        val y = a.y + (easedT * (b.y - a.y)).roundToInt()
+        val z = a.z + (easedT * (b.z - a.z)).roundToInt()
         return Vector3i(x, y, z)
     }
 }

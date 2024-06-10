@@ -1,5 +1,6 @@
 package dev.sterner.joker.client
 
+import com.mojang.math.Axis
 import dev.sterner.joker.JokerMod
 import dev.sterner.joker.client.widget.StartGameWidget
 import dev.sterner.joker.component.JokerComponents
@@ -36,12 +37,18 @@ class GameScreen(component: Component) : Screen(component) {
     var handSize = 8
     var deck: MutableList<Card>? = null
 
+    var backside = CardObject()
+
     constructor(player: Player) : this(GameNarrator.NO_TITLE) {
         this.player = player
 
         val components = JokerComponents.DECK.get(player)
         this.deck = components.gameDeck
         this.gameLoop = components.gameLoop
+        var co = this.deck!!.get(0)
+        var cardo = CardObject()
+        cardo.card = co
+        this.backside = cardo
     }
 
     override fun init() {
@@ -88,7 +95,7 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
         if (button == 0 && draggingObject != null) {
-            draggingObject!!.screenPos = Vector3i((mouseX - offsetX).toInt(), this.height - gameLoop!!.handLevelY, 10)
+            draggingObject!!.screenPos = Vector3i((mouseX - offsetX).toInt(), this.height - gameLoop!!.handLevelY - 8, 200)
         }
         return false
     }
@@ -135,6 +142,9 @@ class GameScreen(component: Component) : Screen(component) {
         for (cardObject in gameLoop!!.hand) {
             GameUtils.renderCard(guiGraphics, cardObject.screenPos, 16f, quaternionf, cardObject, partialTick)
         }
+        quaternionf.mul(Axis.YP.rotationDegrees(180f))
+
+        GameUtils.renderCard(guiGraphics, Vector3i(this.width - 50,this.height - 40,0), 16f, quaternionf, backside, partialTick)
     }
 
 

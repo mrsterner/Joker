@@ -56,7 +56,7 @@ class GameLoop(val component: PlayerDeckComponent) {
         if (handSize < totalHandSize) {
 
             val point = calculateEquallySpacedPoints(totalHandSize)
-            val pos = Vector3i(handLevelX + point[handSize], this.screenHeight - handLevelY, handSize)
+            val pos = Vector3i(handLevelX + point[handSize], this.screenHeight - handLevelY, handSize * 4)
 
             gameSubStageCounter++
             if (gameSubStageCounter >= 20 * 1) {
@@ -64,7 +64,7 @@ class GameLoop(val component: PlayerDeckComponent) {
                 val card = component.pickRandomCardAndRemove(gameDeck)
                 val cardEntity = CardObject()
                 cardEntity.card = card
-                cardEntity.screenPos = Vector3i(30,30,0)
+                cardEntity.screenPos = Vector3i(this.screenWidth - 50,this.screenHeight - 40,0)
                 cardEntity.targetScreenPos = pos
 
                 println("TargetPos: ${formatVector3i(cardEntity.targetScreenPos)} : $handSize : ${component.player.level().isClientSide}")
@@ -92,9 +92,11 @@ class GameLoop(val component: PlayerDeckComponent) {
         hand.sortBy { it.screenPos.x }
         JokerComponents.DECK.sync(component.player)
         val point: List<Int> = calculateEquallySpacedPoints(component.totalHandSize)
-        for ((j, i) in point.indices.withIndex()) {
-            val pos = Vector3i(handLevelX + point[i], this.screenHeight - handLevelY, j)
-            hand[i].targetScreenPos = pos
+        var counter = 0
+        for (space in point) {
+            val pos = Vector3i(handLevelX + space, this.screenHeight - handLevelY, counter * 10)
+            hand[counter].targetScreenPos = pos
+            counter++
         }
     }
 
