@@ -24,10 +24,11 @@ class GameLoop(val component: PlayerDeckComponent) {
 
     fun tick() {
 
-
         for (cardObject in hand) {
-            cardObject.tick(Minecraft.getInstance().timer.gameTimeDeltaTicks)
-            JokerComponents.DECK.sync(component.player)
+            if (!cardObject.isHolding) {
+                cardObject.tick(Minecraft.getInstance().timer.gameTimeDeltaTicks)
+                JokerComponents.DECK.sync(component.player)
+            }
         }
 
         if (gameStage == GameStage.NONE) {
@@ -50,8 +51,6 @@ class GameLoop(val component: PlayerDeckComponent) {
     }
 
     fun tickOnNone(gameDeck: MutableList<Card>, totalHandSize: Int, gameStageCounter: Int): Boolean {
-
-
 
 
         if (handSize < totalHandSize) {
@@ -91,10 +90,11 @@ class GameLoop(val component: PlayerDeckComponent) {
 
     fun reorderHand() {
         hand.sortBy { it.screenPos.x }
+        JokerComponents.DECK.sync(component.player)
         val point: List<Int> = calculateEquallySpacedPoints(component.totalHandSize)
         for ((j, i) in point.indices.withIndex()) {
             val pos = Vector3i(handLevelX + point[i], this.screenHeight - handLevelY, j)
-            hand[i].screenPos = pos
+            hand[i].targetScreenPos = pos
         }
     }
 

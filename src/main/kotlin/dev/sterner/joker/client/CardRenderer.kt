@@ -6,8 +6,6 @@ import dev.sterner.joker.JokerMod
 import dev.sterner.joker.client.model.CardEntityModel
 import dev.sterner.joker.game.CardObject
 import net.minecraft.client.Minecraft
-import net.minecraft.client.model.EntityModel
-import net.minecraft.client.model.geom.ModelLayers
 import net.minecraft.client.model.geom.ModelPart
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.RenderType

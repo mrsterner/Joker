@@ -78,6 +78,7 @@ class GameScreen(component: Component) : Screen(component) {
             // If a card with the highest z-coordinate is found, set it as the dragging object
             if (highestZObject != null) {
                 draggingObject = highestZObject
+                draggingObject!!.isHolding = true
                 offsetX = mouseX - highestZObject.screenPos.x
                 offsetY = mouseY - highestZObject.screenPos.y
             }
@@ -96,6 +97,7 @@ class GameScreen(component: Component) : Screen(component) {
         if (draggingObject != null) {
             val vec = draggingObject!!.screenPos
             draggingObject!!.screenPos = Vector3i(vec.x, vec.y, 0)
+            draggingObject!!.isHolding = false
             draggingObject = null
             gameLoop!!.reorderHand()
         }

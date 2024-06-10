@@ -5,6 +5,7 @@ import dev.sterner.joker.core.Special
 import org.joml.Vector3i
 
 class CardObject {
+    var isHolding: Boolean = false
     val width: Int = 31
     val height: Int = 45
     var card: Card? = null
