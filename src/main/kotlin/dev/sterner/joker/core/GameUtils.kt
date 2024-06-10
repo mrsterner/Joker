@@ -3,7 +3,11 @@ package dev.sterner.joker.core
 import com.mojang.blaze3d.platform.Lighting
 import com.mojang.blaze3d.systems.RenderSystem
 import dev.sterner.joker.JokerMod
-import dev.sterner.joker.client.CardScreenObject
+import dev.sterner.joker.client.CardRenderer
+import dev.sterner.joker.component.PlayerDeckComponent
+import dev.sterner.joker.game.CardObject
+import dev.sterner.joker.game.GameLoop
+import dev.sterner.joker.game.GameStage
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.renderer.MultiBufferSource
@@ -11,7 +15,6 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.world.entity.Entity
 import org.joml.Quaternionf
-import org.joml.Vector3f
 import org.joml.Vector3i
 import java.util.*
 
@@ -153,7 +156,7 @@ object GameUtils {
         pos: Vector3i,
         scale: Float,
         pose: Quaternionf?,
-        entity: Entity,
+        cardObject: CardObject,
         partialTick: Float
     ) {
         guiGraphics.pose().pushPose()
@@ -165,8 +168,10 @@ object GameUtils {
 
         entityRenderDispatcher.setRenderShadow(false)
         RenderSystem.runAsFancy {
+            CardRenderer.renderCard(cardObject, guiGraphics.pose(),guiGraphics.bufferSource() as MultiBufferSource, partialTick,0xF000F0)
+            /*
             entityRenderDispatcher.render(
-                entity,
+                cardObject,
                 0.0,
                 0.0,
                 0.0,
@@ -176,6 +181,8 @@ object GameUtils {
                 guiGraphics.bufferSource() as MultiBufferSource,
                 0xF000F0
             )
+
+             */
         }
         guiGraphics.flush()
         entityRenderDispatcher.setRenderShadow(true)
@@ -183,13 +190,77 @@ object GameUtils {
         Lighting.setupFor3DItems()
     }
 
-    fun makeCardScreenObject(card: Card, pos: Vector3i): CardScreenObject {
-        val obj = CardScreenObject()
-        val entity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level!!)
-        entity!!.card = card
-        obj.cardEntity = entity
-        obj.centerPos = pos
-        return obj
+    fun writeCardObjectToTag(cardObject: CardObject): CompoundTag {
+        var tag = CompoundTag()
+        writeCardToTag(cardObject.card!!, tag)
+
+        tag.putInt("X", cardObject.screenPos.x)
+        tag.putInt("Y", cardObject.screenPos.y)
+        tag.putInt("Z", cardObject.screenPos.z)
+
+        tag.putInt("TX", cardObject.targetScreenPos.x)
+        tag.putInt("TY", cardObject.targetScreenPos.y)
+        tag.putInt("TZ", cardObject.targetScreenPos.z)
+        return tag
+    }
+
+    fun readCardObjectFromTag(tag: CompoundTag, cardEntity: CardObject) : CardObject {
+        //val cardEntity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level!!) as CardEntity
+
+        if (tag.contains("X")) {
+            val card = readCardFromTag(tag)
+            cardEntity.card = card
+
+            cardEntity.screenPos = Vector3i(tag.getInt("X"), tag.getInt("Y"), tag.getInt("Z"))
+            cardEntity.targetScreenPos = Vector3i(tag.getInt("TX"), tag.getInt("TY"), tag.getInt("TZ"))
+        }
+        return cardEntity
+    }
+
+    fun writeCardObjectsToTag(tag: CompoundTag, deck: MutableList<CardObject>) : CompoundTag {
+        val tagList = ListTag()
+
+        for (card in deck) {
+            val cardTag = writeCardObjectToTag(card)
+            tagList.add(cardTag)
+        }
+
+        tag.put("ScreenHand", tagList)
+        return tag
+    }
+
+    fun readCardObjectsFromTag(tag: CompoundTag, cardEntity: CardObject) : MutableList<CardObject> {
+        val deck = ArrayList<CardObject>()
+
+        if (tag.contains("ScreenHand")) {
+            val listTag: ListTag = tag.getList("ScreenHand", 10)
+
+            for (i in 0 until listTag.size) {
+                val cardTag = listTag.getCompound(i)
+                deck.add(readCardObjectFromTag(cardTag, cardEntity))
+            }
+        }
+
+        return deck
+    }
+
+    fun writeGameLoop(tag: CompoundTag, gameLoop: GameLoop) {
+        tag.putString("GameStage", gameLoop.gameStage.name)
+        tag.putInt("StageCounter", gameLoop.gameStageCounter)
+        tag.putInt("SubStageCounter", gameLoop.gameSubStageCounter)
+        writeCardObjectsToTag(tag, gameLoop.hand)
+    }
+
+    fun readGameLoop(playerDeckComponent: PlayerDeckComponent, tag: CompoundTag, cardEntity: CardObject): GameLoop {
+        var gameLoop = GameLoop(playerDeckComponent)
+        if (tag.contains("GameStage")) {
+            gameLoop.gameStage = GameStage.valueOf(tag.getString("GameStage"))
+            gameLoop.gameStageCounter = tag.getInt("StageCounter")
+            gameLoop.gameSubStageCounter = tag.getInt("SubStageCounter")
+            gameLoop.hand = readCardObjectsFromTag(tag, cardEntity)
+        }
+
+        return gameLoop
     }
 
     /** Game loop

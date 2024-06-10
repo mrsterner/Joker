@@ -3,43 +3,30 @@ package dev.sterner.joker.client.model
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import dev.sterner.joker.JokerMod
-import net.minecraft.client.model.EntityModel
+import net.minecraft.client.model.Model
 import net.minecraft.client.model.geom.ModelLayerLocation
 import net.minecraft.client.model.geom.ModelPart
 import net.minecraft.client.model.geom.PartPose
 import net.minecraft.client.model.geom.builders.*
-import net.minecraft.world.entity.Entity
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.resources.ResourceLocation
+import java.util.function.Function
 
 
-class CardEntityModel<T : Entity>(root: ModelPart) : EntityModel<T>() {
-
-    private val bbMain: ModelPart = root.getChild("bb_main")
-
-    override fun setupAnim(
-        entity: T,
-        limbSwing: Float,
-        limbSwingAmount: Float,
-        ageInTicks: Float,
-        netHeadYaw: Float,
-        headPitch: Float
-    ) {
-        // Animation logic goes here
-    }
+class CardEntityModel(val root: ModelPart) : Model(Function { location: ResourceLocation -> RenderType.entitySolid(location) }) {
 
     override fun renderToBuffer(poseStack: PoseStack, vertexConsumer: VertexConsumer, packedLight: Int, packedOverlay: Int, k: Int) {
-        bbMain.render(poseStack, vertexConsumer, packedLight, packedOverlay, k)
+        root.render(poseStack, vertexConsumer, packedLight, packedOverlay, k)
     }
 
-
     companion object {
-        val LAYER_LOCATION = ModelLayerLocation(JokerMod.id("card_overlay"), "main")
+        val LAYER_LOCATION = ModelLayerLocation(JokerMod.id("card"), "main")
 
         fun createCardOverlayModel(): LayerDefinition {
             val meshDefinition = MeshDefinition()
             val partdefinition = meshDefinition.root
 
-            partdefinition.addOrReplaceChild(
-                "bb_main",
+            partdefinition.addOrReplaceChild("root",
                 CubeListBuilder.create().texOffs(0, 0)
                     .addBox(-15.5f, -22.5f, -0.5f, 31.0f, 45.0f, 0.0f, CubeDeformation(0.0f)),
                 PartPose.offset(0.0f, 24.0f, 0.0f)

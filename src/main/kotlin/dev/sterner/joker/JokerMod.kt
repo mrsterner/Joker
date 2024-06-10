@@ -1,11 +1,9 @@
 package dev.sterner.joker
 
 import com.mojang.blaze3d.platform.InputConstants
-import dev.sterner.joker.client.CardEntityRenderer
 import dev.sterner.joker.client.GameScreen
 import dev.sterner.joker.client.model.CardEntityModel
 import dev.sterner.joker.component.JokerComponents
-import dev.sterner.joker.game.CardEntity
 import dev.sterner.joker.networking.JokerNetworking
 import dev.sterner.joker.networking.c2s.StartGameButtonPacket
 import net.fabricmc.api.ClientModInitializer
@@ -36,18 +34,12 @@ object JokerMod : ModInitializer, ClientModInitializer {
 	val logger = LoggerFactory.getLogger(id)
 	var keyBinding: KeyMapping? = null
 
-	val CARD_ENTITY = EntityType.Builder.of(::CardEntity, MobCategory.MISC).build("card_entity")
 
 	override fun onInitialize() {
-		Registry.register(BuiltInRegistries.ENTITY_TYPE, "card_entity", CARD_ENTITY)
-
 		JokerNetworking.init()
-
-
 	}
 
 	override fun onInitializeClient() {
-		EntityRendererRegistry.register(CARD_ENTITY, ::CardEntityRenderer)
 
 		EntityModelLayerRegistry.registerModelLayer(CardEntityModel.LAYER_LOCATION, CardEntityModel.Companion::createCardOverlayModel)
 
@@ -73,9 +65,14 @@ object JokerMod : ModInitializer, ClientModInitializer {
 
 		ServerPlayNetworking.registerGlobalReceiver(StartGameButtonPacket.TYPE) { packet, ctx ->
 			ctx.player().server.execute {
-				println("HELLO")
-				var component = JokerComponents.DECK.get(ctx.player())
-				component.gameOn = true
+
+				val component = JokerComponents.DECK.get(ctx.player())
+				component.gameOn = !component.gameOn
+				if (!component.gameOn ) {
+					component.gameDeck.clear()
+					component.hand.clear()
+				}
+				println("Game status: ${component.gameOn}")
 				JokerComponents.DECK.sync(ctx.player())
 			}
 		}

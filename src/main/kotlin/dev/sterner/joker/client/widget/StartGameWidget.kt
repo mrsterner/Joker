@@ -9,11 +9,11 @@ import net.minecraft.client.gui.components.WidgetSprites
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
+import java.util.function.Consumer
 
 class StartGameWidget(x: Int, y: Int, width: Int, height: Int, message: Component) : AbstractWidget(x, y, width, height,
     message
 ) {
-
 
     val SPRITES: WidgetSprites = WidgetSprites(
         ResourceLocation.withDefaultNamespace("widget/tab_selected"),
@@ -25,13 +25,7 @@ class StartGameWidget(x: Int, y: Int, width: Int, height: Int, message: Componen
 
     override fun renderWidget(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         RenderSystem.enableBlend()
-        guiGraphics.blitSprite(
-            SPRITES[false, this.isHoveredOrFocused],
-            this.x,
-            this.y,
-            this.width,
-            this.height
-        )
+        guiGraphics.blitSprite(SPRITES[false, this.isHoveredOrFocused], this.x, this.y, this.width, this.height)
         RenderSystem.disableBlend()
     }
 
@@ -40,10 +34,7 @@ class StartGameWidget(x: Int, y: Int, width: Int, height: Int, message: Componen
     }
 
     override fun onClick(mouseX: Double, mouseY: Double) {
-        println("Click")
-        if (isValidClickButton(0)) {
-            println("Click")
-            ClientPlayNetworking.send(StartGameButtonPacket())
-        }
+        ClientPlayNetworking.send(StartGameButtonPacket())
+        super.onClick(mouseX, mouseY)
     }
 }

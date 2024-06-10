@@ -4,19 +4,19 @@ import dev.sterner.joker.JokerMod
 import dev.sterner.joker.client.widget.StartGameWidget
 import dev.sterner.joker.component.JokerComponents
 import dev.sterner.joker.core.*
+import dev.sterner.joker.game.CardObject
 import dev.sterner.joker.game.GameLoop
-import dev.sterner.joker.networking.c2s.StartGameButtonPacket
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.GameNarrator
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
-import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.multiplayer.resolver.ServerAddress
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Player
 import org.joml.Quaternionf
 import org.joml.Vector3i
+import java.util.function.Consumer
 
 
 class GameScreen(component: Component) : Screen(component) {
@@ -28,11 +28,9 @@ class GameScreen(component: Component) : Screen(component) {
     private var imageWidth: Int = 415
     private var imageHeight: Int = 212
 
-    var draggingObject: CardScreenObject? = null
+    var draggingObject: CardObject? = null
     var offsetX = 0.0
     var offsetY = 0.0
-
-
 
     //From Component
     var handSize = 8
@@ -42,37 +40,13 @@ class GameScreen(component: Component) : Screen(component) {
         this.player = player
 
         val components = JokerComponents.DECK.get(player)
-        this.handSize = components.handSize
-        this.deck = components.gameDeck()
+        this.deck = components.gameDeck
         this.gameLoop = components.gameLoop
     }
 
     override fun init() {
-        //TODO obviously remove this
-        //this.hand = makeHand()
-        val scaledX = (this.width - this.imageWidth) / 2
-        val scaledY = (this.height - this.imageHeight) / 2
-
-        val wig = StartGameWidget(64, 64, 18, 18, Component.literal("Hello"))
-
-        this.addRenderableWidget(wig)
+       this.addRenderableWidget(StartGameWidget(64 ,64 ,16, 16, Component.literal("Hello")))
     }
-
-    /*
-    private fun makeHand(): MutableList<CardScreenObject> {
-        val list = mutableListOf<CardScreenObject>()
-
-        val point = calculateEquallySpacedPoints()
-        for ((j, i) in point.withIndex()) {
-
-            val pos = Vector3i(handLevelX + i, this.height - handLevelY, j)
-            list.add(GameUtils.makeCardScreenObject(Card(Suit.entries.random(), Rank.entries.random(), Special.NONE, Stamp.NONE), pos))
-        }
-
-        return list
-    }
-
-     */
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (minecraft!!.options.keyInventory.matches(keyCode, scanCode)) {
@@ -84,18 +58,18 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (button == 0) {
-            var highestZObject: CardScreenObject? = null
+            var highestZObject: CardObject? = null
             var highestZ = Int.MIN_VALUE
 
-            for (obj in gameLoop!!.hand!!) {
-                val x = obj.centerPos.x
-                val y = obj.centerPos.y
+            for (obj in gameLoop!!.hand) {
+                val x = obj.screenPos.x
+                val y = obj.screenPos.y
 
-                if (mouseX < x + (obj.width!! / 6) && mouseX > x - (obj.width!!)) {
+                if (mouseX < x + (obj.width / 6) && mouseX > x - (obj.width)) {
                     if (mouseY < y + (obj.height / 6) && mouseY > y - (obj.height)) {
-                        if (obj.centerPos.z > highestZ) {
+                        if (obj.screenPos.z > highestZ) {
                             highestZObject = obj
-                            highestZ = obj.centerPos.z
+                            highestZ = obj.screenPos.z
                         }
                     }
                 }
@@ -104,46 +78,50 @@ class GameScreen(component: Component) : Screen(component) {
             // If a card with the highest z-coordinate is found, set it as the dragging object
             if (highestZObject != null) {
                 draggingObject = highestZObject
-                offsetX = mouseX - highestZObject.centerPos.x
-                offsetY = mouseY - highestZObject.centerPos.y
+                offsetX = mouseX - highestZObject.screenPos.x
+                offsetY = mouseY - highestZObject.screenPos.y
             }
         }
-        return false
+        return super.mouseClicked(mouseX, mouseY, button)
     }
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
         if (button == 0 && draggingObject != null) {
-            draggingObject!!.centerPos = Vector3i((mouseX - offsetX).toInt(), this.height - gameLoop!!.handLevelY, 10)
+            draggingObject!!.screenPos = Vector3i((mouseX - offsetX).toInt(), this.height - gameLoop!!.handLevelY, 10)
         }
         return false
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (draggingObject != null) {
-            val vec = draggingObject!!.centerPos
-            draggingObject!!.centerPos = Vector3i(vec.x, vec.y, 0)
+            val vec = draggingObject!!.screenPos
+            draggingObject!!.screenPos = Vector3i(vec.x, vec.y, 0)
             draggingObject = null
+            gameLoop!!.reorderHand()
         }
 
         offsetX = 0.0
         offsetY = 0.0
-        gameLoop!!.reorderHand()
+
         return super.mouseReleased(mouseX, mouseY, button)
     }
 
 
 
     fun orderHandByRank() {
-        gameLoop!!.hand?.sortBy { it.cardEntity?.card?.rank }
+        gameLoop!!.hand?.sortBy { it.card?.rank }
     }
 
     fun orderHandBySuit() {
-        gameLoop!!.hand?.sortBy { it.cardEntity?.card?.suit }
+        gameLoop!!.hand?.sortBy { it.card?.suit }
     }
 
     override fun tick() {
         super.tick()
-
+        this.gameLoop = JokerComponents.DECK.get(player!!).gameLoop
+        for (cardObject in gameLoop!!.hand) {
+            //println(cardObject.targetPos)
+        }
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -152,8 +130,8 @@ class GameScreen(component: Component) : Screen(component) {
         val quaternionf2 = Quaternionf().rotateX(1 * (Math.PI.toFloat() / 180))
         quaternionf.mul(quaternionf2)
 
-        for (cardObject in gameLoop!!.hand!!) {
-            GameUtils.renderCard(guiGraphics, cardObject.centerPos, 16f, quaternionf, cardObject.cardEntity!!, partialTick)
+        for (cardObject in gameLoop!!.hand) {
+            GameUtils.renderCard(guiGraphics, cardObject.screenPos, 16f, quaternionf, cardObject, partialTick)
         }
     }
 

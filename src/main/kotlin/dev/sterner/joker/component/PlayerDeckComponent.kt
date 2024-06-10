@@ -3,8 +3,9 @@ package dev.sterner.joker.component
 import dev.sterner.joker.JokerMod
 import dev.sterner.joker.core.Card
 import dev.sterner.joker.core.GameUtils
+import dev.sterner.joker.game.CardObject
 import dev.sterner.joker.game.GameLoop
-import dev.sterner.joker.game.GameStage
+import net.minecraft.client.Minecraft
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
@@ -17,30 +18,16 @@ class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, CommonTicki
     var deck: MutableList<Card> = GameUtils.createStandardDeck()
 
     //Deck loaded for game
-    var gameDeck: MutableList<Card> = ArrayList()
-    var discardPile: MutableList<Card> = ArrayList()
+    var gameDeck: MutableList<Card> = deck
 
     var hand: MutableList<Card> = ArrayList()
-    var handSize: Int = 0
     var totalHandSize: Int = 9
 
     var gameOn: Boolean = false
-
     var gameLoop: GameLoop = GameLoop(this)
-
-    fun gameDeck(): MutableList<Card> {
-        if (deck.isEmpty()) {
-            val deck = GameUtils.createStandardDeck()
-            deck.shuffle()
-            return deck
-        }
-        gameDeck = deck
-        return gameDeck
-    }
 
     override fun tick() {
         if (gameOn) {
-            println("TICK")
             gameLoop.tick()
         } else {
             gameLoop.reset()
@@ -67,10 +54,17 @@ class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, CommonTicki
 
     override fun readFromNbt(tag: CompoundTag, registryLookup: HolderLookup.Provider) {
         deck = GameUtils.readDeckFromTag(tag)
+        if (Minecraft.getInstance().level != null) {
+            gameLoop = GameUtils.readGameLoop(this, tag, CardObject())
+        }
+
+        gameOn = tag.getBoolean("GameOn")
     }
 
     override fun writeToNbt(tag: CompoundTag, registryLookup: HolderLookup.Provider) {
         GameUtils.writeDeckToTag(tag, deck)
+        GameUtils.writeGameLoop(tag, gameLoop)
+        tag.putBoolean("GameOn", gameOn)
     }
 
 
