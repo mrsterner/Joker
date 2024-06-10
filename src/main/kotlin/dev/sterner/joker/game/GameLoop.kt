@@ -3,6 +3,7 @@ package dev.sterner.joker.game
 import dev.sterner.joker.component.JokerComponents
 import dev.sterner.joker.component.PlayerDeckComponent
 import dev.sterner.joker.core.*
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.Minecraft
 import org.joml.Vector3i
 
@@ -22,6 +23,13 @@ class GameLoop(val component: PlayerDeckComponent) {
     var handSize = 0
 
     fun tick() {
+
+
+        for (cardObject in hand) {
+            cardObject.tick(Minecraft.getInstance().timer.gameTimeDeltaTicks)
+            JokerComponents.DECK.sync(component.player)
+        }
+
         if (gameStage == GameStage.NONE) {
             gameStageCounter++
             val bl: Boolean = tickOnNone(component.gameDeck, component.totalHandSize, gameStageCounter)
@@ -43,10 +51,7 @@ class GameLoop(val component: PlayerDeckComponent) {
 
     fun tickOnNone(gameDeck: MutableList<Card>, totalHandSize: Int, gameStageCounter: Int): Boolean {
 
-        for (cardObject in hand) {
-            cardObject.tick(0.5f)
-            JokerComponents.DECK.sync(component.player)
-        }
+
 
 
         if (handSize < totalHandSize) {
@@ -55,14 +60,16 @@ class GameLoop(val component: PlayerDeckComponent) {
             val pos = Vector3i(handLevelX + point[handSize], this.screenHeight - handLevelY, handSize)
 
             gameSubStageCounter++
-            if (gameSubStageCounter >= 20 * 2) {
+            if (gameSubStageCounter >= 20 * 1) {
                 gameSubStageCounter = 0
                 val card = component.pickRandomCardAndRemove(gameDeck)
                 val cardEntity = CardObject()
                 cardEntity.card = card
                 cardEntity.screenPos = Vector3i(30,30,0)
                 cardEntity.targetScreenPos = pos
-                println("TargetPos: " + cardEntity.targetScreenPos + " : " + handSize + " : " + component.player.level().isClientSide)
+
+                println("TargetPos: ${formatVector3i(cardEntity.targetScreenPos)} : $handSize : ${component.player.level().isClientSide}")
+
                 hand.add(cardEntity)
                 handSize++
 
@@ -156,6 +163,9 @@ class GameLoop(val component: PlayerDeckComponent) {
     fun reset() {
         gameStage = GameStage.NONE
         gameStageCounter = 0
+        gameSubStageCounter = 0
+        handSize = 0
+        hand.clear()
     }
 
     /** Game loop
@@ -203,5 +213,9 @@ class GameLoop(val component: PlayerDeckComponent) {
     11. Check win condition
 
      */
+
+    fun formatVector3i(vector: Vector3i): String {
+        return String.format("( %.1f %.1f %.1f )", vector.x.toDouble(), vector.y.toDouble(), vector.z.toDouble())
+    }
 
 }

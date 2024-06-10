@@ -13,7 +13,9 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
+import net.fabricmc.fabric.api.networking.v1.PacketSender
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.Minecraft
@@ -22,6 +24,8 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.MinecraftServer
+import net.minecraft.server.network.ServerGamePacketListenerImpl
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.MobCategory
 import org.lwjgl.glfw.GLFW
@@ -37,7 +41,16 @@ object JokerMod : ModInitializer, ClientModInitializer {
 
 	override fun onInitialize() {
 		JokerNetworking.init()
+
+		ServerPlayConnectionEvents.JOIN.register(::onPlayerJoin)
 	}
+
+	private fun onPlayerJoin(packet: ServerGamePacketListenerImpl?, packetSender: PacketSender?, minecraftServer: MinecraftServer?) {
+		if (packet != null && packet.player != null) {
+			JokerComponents.DECK.get(packet.player).gameOn = false
+		}
+	}
+
 
 	override fun onInitializeClient() {
 

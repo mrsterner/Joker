@@ -10,9 +10,10 @@ import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent
+import org.ladysnake.cca.api.v3.component.tick.ClientTickingComponent
 import org.ladysnake.cca.api.v3.component.tick.CommonTickingComponent
 
-class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, CommonTickingComponent  {
+class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, ClientTickingComponent  {
 
     //Stored player deck
     var deck: MutableList<Card> = GameUtils.createStandardDeck()
@@ -26,7 +27,7 @@ class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, CommonTicki
     var gameOn: Boolean = false
     var gameLoop: GameLoop = GameLoop(this)
 
-    override fun tick() {
+    override fun clientTick() {
         if (gameOn) {
             gameLoop.tick()
         } else {
@@ -36,6 +37,7 @@ class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, CommonTicki
 
     fun pickRandomCardAndRemove(gameDeck: MutableList<Card>): Card {
         gameDeck.shuffle()
+        JokerComponents.DECK.sync(player)
         val card = gameDeck.removeFirst()
         return card
     }
