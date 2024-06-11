@@ -2,9 +2,7 @@ package dev.sterner.joker.client
 
 import com.mojang.math.Axis
 import dev.sterner.joker.JokerMod
-import dev.sterner.joker.client.widget.OptionsWidget
-import dev.sterner.joker.client.widget.RunInfoWidget
-import dev.sterner.joker.client.widget.StartGameWidget
+import dev.sterner.joker.client.widget.*
 import dev.sterner.joker.component.JokerComponents
 import dev.sterner.joker.core.*
 import dev.sterner.joker.game.CardObject
@@ -61,6 +59,13 @@ class GameScreen(component: Component) : Screen(component) {
 
         this.addRenderableWidget(RunInfoWidget(scaledX + 16,scaledY + 180 - 40 + 19,31, 21, Component.literal("Run Info")))
         this.addRenderableWidget(OptionsWidget(scaledX + 16,scaledY + 180 + 7,31, 21, Component.literal("Options")))
+
+        this.addRenderableWidget(PlayHandWidget(scaledX + 16 + 150,scaledY + 180 + 20,33, 22, Component.literal("Play Hand")))
+        this.addRenderableWidget(DiscardHandWidget(scaledX + 16 + 55 + 150,scaledY + 180 + 20,33, 22, Component.literal("Discard Hand")))
+
+
+        this.addRenderableWidget(SortHandWidget(true, scaledX + 16 + 150 + 37,scaledY + 180 + 22,14, 8, Component.literal("Sort Rank")))
+        this.addRenderableWidget(SortHandWidget(false, scaledX + 16 + 150 + 37,scaledY + 180 + 32,14, 8, Component.literal("Sort Suit")))
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {

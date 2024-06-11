@@ -16,7 +16,7 @@ class GameLoop(val component: PlayerDeckComponent) {
     var screenWidth = Minecraft.getInstance().window.guiScaledWidth
 
     var hand: MutableList<CardObject> = ArrayList()
-    var handLevelY = 30
+    var handLevelY = 40
     var handLevelX = 128 + 32
 
     var handSize = 0
@@ -52,7 +52,7 @@ class GameLoop(val component: PlayerDeckComponent) {
         if (handSize < totalHandSize) {
             val point = calculateEquallySpacedPoints(totalHandSize)
             val handDSize = hand.size
-            val arcHeight = 10 // Maximum height adjustment for the arc
+            val arcHeight = 6 // Maximum height adjustment for the arc
             val centerIndex = (totalHandSize - 1) / 2.0 // Center index for the arc
 
             val index = handDSize
@@ -61,7 +61,7 @@ class GameLoop(val component: PlayerDeckComponent) {
             val pos = Vector3i(handLevelX + point[handDSize], this.screenHeight - handLevelY - yOffset.toInt(), handDSize * 4)
 
             gameSubStageCounter++
-            if (gameSubStageCounter >= 20 * 0.25) {
+            if (gameSubStageCounter >= 20 * 0.2) {
                 gameSubStageCounter = 0
                 val card = component.pickRandomCardAndRemove(gameDeck)
                 val cardEntity = CardObject()
@@ -91,7 +91,7 @@ class GameLoop(val component: PlayerDeckComponent) {
         hand.sortBy { it.screenPos.x }
         JokerComponents.DECK.sync(component.player)
         val point: List<Int> = calculateEquallySpacedPoints(component.totalHandSize)
-        val arcHeight = 10 // Maximum height adjustment for the arc
+        val arcHeight = 6 // Maximum height adjustment for the arc
         val centerIndex = (hand.size - 1) / 2.0 // Center index for the arc
 
         var counter = 0

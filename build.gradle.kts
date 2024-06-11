@@ -40,10 +40,10 @@ dependencies {
 	modImplementation("net.fabricmc.fabric-api:fabric-api:${project.extra["fabric_version"] as String}")
 	modImplementation("net.fabricmc:fabric-language-kotlin:${project.extra["fabric_kotlin_version"] as String}")
 
-	modImplementation("org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.0")
-	modImplementation("org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.0")
-	include("org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.0")
-	include("org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.0")
+	modImplementation("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.extra["cardinal_components_version"] as String}")
+	modImplementation("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.extra["cardinal_components_version"] as String}")
+	include("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.extra["cardinal_components_version"] as String}")
+	include("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.extra["cardinal_components_version"] as String}")
 }
 
 tasks.named<ProcessResources>("processResources") {
