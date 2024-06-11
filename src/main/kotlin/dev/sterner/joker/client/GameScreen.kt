@@ -170,7 +170,7 @@ class GameScreen(component: Component) : Screen(component) {
         for (index in 1 until 5) {
             GameUtils.renderCard(
                 guiGraphics,
-                Vector3d(this.width - 20.0 + (index / 2), this.height - 20.0 - (index / 2), index.toDouble()),
+                Vector3d(this.width - 20.0 + (index / 2), this.height - 25.0 - (index / 2), index.toDouble()),
                 16f,
                 quaternionf,
                 backside,

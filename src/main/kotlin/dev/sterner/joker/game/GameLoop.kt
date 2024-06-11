@@ -55,10 +55,8 @@ class GameLoop(val component: PlayerDeckComponent) {
             val handDSize = hand.size
             val arcHeight = 10 // Maximum height adjustment for the arc
             val centerIndex = (totalHandSize - 1) / 2.0 // Center index for the arc
-            val arcAngle = 10f // Total angle for the arc
 
             val index = handDSize
-            val angleOffset = ((index - centerIndex) / totalHandSize) * arcAngle
             val yOffset = ((centerIndex - Math.abs(index - centerIndex)) / centerIndex) * arcHeight
 
             val pos = Vector3i(handLevelX + point[handDSize], this.screenHeight - handLevelY - yOffset.toInt(), handDSize * 4)
@@ -71,8 +69,6 @@ class GameLoop(val component: PlayerDeckComponent) {
                 cardEntity.card = card
                 cardEntity.screenPos = Vector3i(this.screenWidth - 50, this.screenHeight - 40, 0)
                 cardEntity.targetScreenPos = pos
-
-                println("TargetPos: ${formatVector3i(cardEntity.targetScreenPos)} : $handDSize : ${component.player.level().isClientSide}")
 
                 hand.add(cardEntity)
                 handSize++
