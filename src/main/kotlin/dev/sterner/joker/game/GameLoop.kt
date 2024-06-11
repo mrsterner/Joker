@@ -3,7 +3,6 @@ package dev.sterner.joker.game
 import dev.sterner.joker.component.JokerComponents
 import dev.sterner.joker.component.PlayerDeckComponent
 import dev.sterner.joker.core.*
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.Minecraft
 import org.joml.Vector3i
 
@@ -26,13 +25,13 @@ class GameLoop(val component: PlayerDeckComponent) {
         for (cardObject in hand) {
             if (!cardObject.isHolding) {
                 cardObject.tick(Minecraft.getInstance().timer.gameTimeDeltaTicks)
-                JokerComponents.DECK.sync(component.player)
+                //JokerComponents.DECK.sync(component.player)
             }
         }
 
         if (gameStage == GameStage.NONE) {
             gameStageCounter++
-            val bl: Boolean = tickOnNone(component.gameDeck, component.totalHandSize, gameStageCounter)
+            val bl: Boolean = tickOnNone(component.gameDeck, component.totalHandSize)
             if (bl && gameStageCounter >= gameStage.time) {
                 gameStageCounter = 0
                 gameStage = GameStage.CHOICE_PHASE
@@ -41,15 +40,15 @@ class GameLoop(val component: PlayerDeckComponent) {
 
         if (gameStage == GameStage.CHOICE_PHASE) {
             gameStageCounter++
-            tickOnChoice(component.gameDeck, component.totalHandSize, gameStageCounter)
-            if (gameStageCounter >= gameStage.time) {
+            val bl: Boolean = tickOnChoice(component.gameDeck, component.totalHandSize)
+            if (bl && gameStageCounter >= gameStage.time) {
                 gameStageCounter = 0
                 gameStage = GameStage.PLAY_PHASE
             }
         }
     }
 
-    fun tickOnNone(gameDeck: MutableList<Card>, totalHandSize: Int, gameStageCounter: Int): Boolean {
+    fun tickOnNone(gameDeck: MutableList<Card>, totalHandSize: Int): Boolean {
         if (handSize < totalHandSize) {
             val point = calculateEquallySpacedPoints(totalHandSize)
             val handDSize = hand.size
@@ -84,7 +83,7 @@ class GameLoop(val component: PlayerDeckComponent) {
         return false
     }
 
-    fun tickOnChoice(gameDeck: MutableList<Card>, totalHandSize: Int, gameStageCounter: Int): Boolean {
+    fun tickOnChoice(gameDeck: MutableList<Card>, totalHandSize: Int): Boolean {
         return true
     }
 
@@ -224,9 +223,4 @@ class GameLoop(val component: PlayerDeckComponent) {
     11. Check win condition
 
      */
-
-    fun formatVector3i(vector: Vector3i): String {
-        return String.format("( %.1f %.1f %.1f )", vector.x.toDouble(), vector.y.toDouble(), vector.z.toDouble())
-    }
-
 }

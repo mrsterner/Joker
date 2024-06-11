@@ -51,7 +51,11 @@ class GameScreen(component: Component) : Screen(component) {
     }
 
     override fun init() {
-       this.addRenderableWidget(StartGameWidget(64 ,64 ,16, 16, Component.literal("Hello")))
+
+        val scaledX = (this.width - this.imageWidth) / 2
+        val scaledY = (this.height - this.imageHeight) / 2
+
+        this.addRenderableWidget(StartGameWidget(scaledX ,scaledY ,16, 16, Component.literal("Hello")))
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
