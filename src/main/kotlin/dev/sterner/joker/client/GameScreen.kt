@@ -195,7 +195,7 @@ class GameScreen(component: Component) : Screen(component) {
             }
 
             draggingObject = null
-            gameLoop!!.reorderHand()
+            gameLoop!!.reorderHandByPos()
         }
 
         isDragging = false

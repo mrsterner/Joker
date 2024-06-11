@@ -26,8 +26,11 @@ class SortHandWidget(screen: GameScreen, val rank: Boolean, x: Int, y: Int, widt
 
     override fun onClick(mouseX: Double, mouseY: Double) {
         if (rank) {
-
+            screen.gameLoop?.orderByRank = true
+        } else {
+            screen.gameLoop?.orderByRank = false
         }
+        screen.gameLoop?.reorderHandByRankOrSuit()
         //TODO Open Options Screen
         super.onClick(mouseX, mouseY)
     }
