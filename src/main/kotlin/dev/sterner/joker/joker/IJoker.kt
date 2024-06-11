@@ -14,5 +14,5 @@ interface IJoker {
 
     fun onOtherJokers()
 
-    
+
 }

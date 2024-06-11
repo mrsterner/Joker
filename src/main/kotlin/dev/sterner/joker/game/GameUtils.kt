@@ -1,19 +1,15 @@
-package dev.sterner.joker.core
+package dev.sterner.joker.game
 
 import com.mojang.blaze3d.platform.Lighting
 import com.mojang.blaze3d.systems.RenderSystem
-import dev.sterner.joker.JokerMod
 import dev.sterner.joker.client.CardRenderer
 import dev.sterner.joker.component.PlayerDeckComponent
-import dev.sterner.joker.game.CardObject
-import dev.sterner.joker.game.GameLoop
-import dev.sterner.joker.game.GameStage
+import dev.sterner.joker.core.*
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
-import net.minecraft.world.entity.Entity
 import org.joml.Quaternionf
 import org.joml.Vector3d
 import org.joml.Vector3i
@@ -100,13 +96,13 @@ object GameUtils {
         return detectedHands
     }
 
-    fun writeCardToTag(card: Card) : CompoundTag {
+    fun writeCardToTag(card: Card): CompoundTag {
         val tag = CompoundTag()
         writeCardToTag(card, tag)
         return tag
     }
 
-    fun writeCardToTag(card: Card, tag: CompoundTag) : CompoundTag {
+    fun writeCardToTag(card: Card, tag: CompoundTag): CompoundTag {
         tag.putString(Constants.Nbt.SUIT, card.suit.name)
         tag.putString(Constants.Nbt.RANK, card.rank.name)
         tag.putString(Constants.Nbt.SPECIAL, card.special.name)
@@ -115,7 +111,7 @@ object GameUtils {
         return tag
     }
 
-    fun readCardFromTag(tag: CompoundTag) : Card {
+    fun readCardFromTag(tag: CompoundTag): Card {
         val suit = Suit.valueOf(tag.getString(Constants.Nbt.SUIT))
         val rank = Rank.valueOf(tag.getString(Constants.Nbt.RANK))
         val special = Special.valueOf(tag.getString(Constants.Nbt.SPECIAL))
@@ -124,7 +120,7 @@ object GameUtils {
         return Card(suit, rank, special, stamp)
     }
 
-    fun writeDeckToTag(tag: CompoundTag, deck: MutableList<Card>) : CompoundTag {
+    fun writeDeckToTag(tag: CompoundTag, deck: MutableList<Card>): CompoundTag {
         val tagList = ListTag()
 
         for (card in deck) {
@@ -136,7 +132,7 @@ object GameUtils {
         return tag
     }
 
-    fun readDeckFromTag(tag: CompoundTag) : MutableList<Card> {
+    fun readDeckFromTag(tag: CompoundTag): MutableList<Card> {
         val deck = ArrayList<Card>()
 
         if (tag.contains(Constants.Nbt.DECK)) {
@@ -160,7 +156,14 @@ object GameUtils {
         cardObject: CardObject,
         partialTick: Float
     ) {
-        renderCard(guiGraphics, Vector3d(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble()), scale, pose, cardObject, partialTick)
+        renderCard(
+            guiGraphics,
+            Vector3d(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble()),
+            scale,
+            pose,
+            cardObject,
+            partialTick
+        )
     }
 
     fun renderCard(
@@ -180,7 +183,13 @@ object GameUtils {
 
         entityRenderDispatcher.setRenderShadow(false)
         RenderSystem.runAsFancy {
-            CardRenderer.renderCard(cardObject, guiGraphics.pose(),guiGraphics.bufferSource() as MultiBufferSource, partialTick,0xF000F0)
+            CardRenderer.renderCard(
+                cardObject,
+                guiGraphics.pose(),
+                guiGraphics.bufferSource() as MultiBufferSource,
+                partialTick,
+                0xF000F0
+            )
         }
         guiGraphics.flush()
         entityRenderDispatcher.setRenderShadow(true)
@@ -202,7 +211,7 @@ object GameUtils {
         return tag
     }
 
-    fun readCardObjectFromTag(tag: CompoundTag, cardEntity: CardObject) : CardObject {
+    fun readCardObjectFromTag(tag: CompoundTag, cardEntity: CardObject): CardObject {
         //val cardEntity = JokerMod.CARD_ENTITY.create(Minecraft.getInstance().level!!) as CardEntity
 
         if (tag.contains("X")) {
@@ -215,7 +224,7 @@ object GameUtils {
         return cardEntity
     }
 
-    fun writeCardObjectsToTag(tag: CompoundTag, deck: MutableList<CardObject>) : CompoundTag {
+    fun writeCardObjectsToTag(tag: CompoundTag, deck: MutableList<CardObject>): CompoundTag {
         val tagList = ListTag()
 
         for (card in deck) {
@@ -227,7 +236,7 @@ object GameUtils {
         return tag
     }
 
-    fun readCardObjectsFromTag(tag: CompoundTag, cardEntity: CardObject) : MutableList<CardObject> {
+    fun readCardObjectsFromTag(tag: CompoundTag, cardEntity: CardObject): MutableList<CardObject> {
         val deck = ArrayList<CardObject>()
 
         if (tag.contains("ScreenHand")) {
@@ -261,23 +270,71 @@ object GameUtils {
         return gameLoop
     }
 
+    fun sellCard(card: Card): JokerContext {
+        return JokerContext()
+    }
+
+    fun useTarot(tarot: Tarot): JokerContext {
+        return JokerContext()
+    }
+
+    fun usePlanet(planet: Planet): JokerContext {
+        return JokerContext()
+    }
+
+    fun sortByRank(hand: List<Card>): List<Card> {
+        return hand.sortedWith(compareByDescending<Card> { it.rank })
+    }
+
+    fun sortBySuit(hand: List<Card>): List<Card> {
+        return hand.sortedWith(compareByDescending<Card> { it.suit })
+    }
+
+    fun evaluateCard(card: Card): JokerContext {
+        return JokerContext()
+    }
+
+    fun checkJoker(card: Card, joker: Joker): JokerContext {
+        return JokerContext()
+    }
+
+    fun checkJoker(playedHand: List<Card>, joker: Joker): JokerContext {
+        return JokerContext()
+    }
+
+    fun checkHand(hand: List<Card>, joker: Joker): JokerContext {
+        return JokerContext()
+    }
+
+    fun triggerBlindAbility(blind: Blind): JokerContext {
+        return JokerContext()
+    }
+
+    fun checkStamp(card: Card): JokerContext {
+        return JokerContext()
+    }
+
+    fun checkSpecial(card: Card): JokerContext {
+        return JokerContext()
+    }
+
     /** Game loop
      *
     1. Select hand of 1 - 5 cards -> 2.
-     1.1 use a Tarot
-     1.2 use a Planet
-     1.3 sell a Joker, Tarot or Planet
-     1.4 Rearrange Jokers
-     1.5 Rearrange Cards'
-     1.6 Sort cards by suit or rank
+    1.1 use a Tarot
+    1.2 use a Planet
+    1.3 sell a Joker, Tarot or Planet
+    1.4 Rearrange Jokers
+    1.5 Rearrange Cards'
+    1.6 Sort cards by suit or rank
 
     2. Play hand -> 4.
-     - Trigger Blind ability
-     2.1 Discard hand -> 3.
-      - Trigger Blind ability
+    - Trigger Blind ability
+    2.1 Discard hand -> 3.
+    - Trigger Blind ability
 
     3. Draw -> 1.
-     - Trigger Blind ability
+    - Trigger Blind ability
 
     4. Start Evaluating
     - Evaluate 1st card -> 5.

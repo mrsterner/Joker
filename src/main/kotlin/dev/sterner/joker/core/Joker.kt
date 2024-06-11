@@ -1,4 +1,3 @@
 package dev.sterner.joker.core
 
-enum class Joker() {
-}
+enum class Joker

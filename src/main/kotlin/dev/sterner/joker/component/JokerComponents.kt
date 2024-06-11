@@ -7,7 +7,7 @@ import org.ladysnake.cca.api.v3.entity.EntityComponentFactoryRegistry
 import org.ladysnake.cca.api.v3.entity.EntityComponentInitializer
 import org.ladysnake.cca.api.v3.entity.RespawnCopyStrategy
 
-class JokerComponents : EntityComponentInitializer{
+class JokerComponents : EntityComponentInitializer {
 
 
     override fun registerEntityComponentFactories(registry: EntityComponentFactoryRegistry) {

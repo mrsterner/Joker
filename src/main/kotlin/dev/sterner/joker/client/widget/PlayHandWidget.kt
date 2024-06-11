@@ -7,9 +7,9 @@ import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.components.WidgetSprites
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceLocation
 
-class PlayHandWidget(x: Int, y: Int, width: Int, height: Int, message: Component) : AbstractWidget(x, y, width, height,
+class PlayHandWidget(x: Int, y: Int, width: Int, height: Int, message: Component) : AbstractWidget(
+    x, y, width, height,
     message
 ) {
 
@@ -30,8 +30,4 @@ class PlayHandWidget(x: Int, y: Int, width: Int, height: Int, message: Component
 
     }
 
-    override fun onClick(mouseX: Double, mouseY: Double) {
-        //TODO Open Options Screen
-        super.onClick(mouseX, mouseY)
-    }
 }

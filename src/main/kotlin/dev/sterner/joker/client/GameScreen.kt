@@ -1,25 +1,22 @@
 package dev.sterner.joker.client
 
-import com.mojang.math.Axis
 import dev.sterner.joker.JokerMod
 import dev.sterner.joker.client.widget.*
 import dev.sterner.joker.component.JokerComponents
-import dev.sterner.joker.core.*
+import dev.sterner.joker.core.Card
 import dev.sterner.joker.game.CardObject
 import dev.sterner.joker.game.GameLoop
+import dev.sterner.joker.game.GameUtils
 import net.minecraft.client.GameNarrator
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
-import net.minecraft.client.multiplayer.resolver.ServerAddress
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Player
 import org.joml.Quaternionf
 import org.joml.Vector3d
-import org.joml.Vector3f
 import org.joml.Vector3i
-import java.util.function.Consumer
 
 
 class GameScreen(component: Component) : Screen(component) {
@@ -55,17 +52,59 @@ class GameScreen(component: Component) : Screen(component) {
         val scaledX = (this.width - this.imageWidth) / 2
         val scaledY = (this.height - this.imageHeight) / 2
 
-        this.addRenderableWidget(StartGameWidget(scaledX ,scaledY ,16, 16, Component.literal("Debug Start Run")))
+        this.addRenderableWidget(StartGameWidget(scaledX, scaledY, 16, 16, Component.literal("Debug Start Run")))
 
-        this.addRenderableWidget(RunInfoWidget(scaledX + 16,scaledY + 180 - 40 + 19,31, 21, Component.literal("Run Info")))
-        this.addRenderableWidget(OptionsWidget(scaledX + 16,scaledY + 180 + 7,31, 21, Component.literal("Options")))
+        this.addRenderableWidget(
+            RunInfoWidget(
+                scaledX + 16,
+                scaledY + 180 - 40 + 19,
+                31,
+                21,
+                Component.literal("Run Info")
+            )
+        )
+        this.addRenderableWidget(OptionsWidget(scaledX + 16, scaledY + 180 + 7, 31, 21, Component.literal("Options")))
 
-        this.addRenderableWidget(PlayHandWidget(scaledX + 16 + 150,scaledY + 180 + 20,33, 22, Component.literal("Play Hand")))
-        this.addRenderableWidget(DiscardHandWidget(scaledX + 16 + 55 + 150,scaledY + 180 + 20,33, 22, Component.literal("Discard Hand")))
+        this.addRenderableWidget(
+            PlayHandWidget(
+                scaledX + 16 + 150,
+                scaledY + 180 + 20,
+                33,
+                22,
+                Component.literal("Play Hand")
+            )
+        )
+        this.addRenderableWidget(
+            DiscardHandWidget(
+                scaledX + 16 + 55 + 150,
+                scaledY + 180 + 20,
+                33,
+                22,
+                Component.literal("Discard Hand")
+            )
+        )
 
 
-        this.addRenderableWidget(SortHandWidget(true, scaledX + 16 + 150 + 37,scaledY + 180 + 22,14, 8, Component.literal("Sort Rank")))
-        this.addRenderableWidget(SortHandWidget(false, scaledX + 16 + 150 + 37,scaledY + 180 + 32,14, 8, Component.literal("Sort Suit")))
+        this.addRenderableWidget(
+            SortHandWidget(
+                true,
+                scaledX + 16 + 150 + 37,
+                scaledY + 180 + 22,
+                14,
+                8,
+                Component.literal("Sort Rank")
+            )
+        )
+        this.addRenderableWidget(
+            SortHandWidget(
+                false,
+                scaledX + 16 + 150 + 37,
+                scaledY + 180 + 32,
+                14,
+                8,
+                Component.literal("Sort Suit")
+            )
+        )
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
@@ -121,7 +160,8 @@ class GameScreen(component: Component) : Screen(component) {
                 isDragging = true
             }
 
-            draggingObject!!.screenPos = Vector3i((mouseX - offsetX).toInt(), this.height - gameLoop!!.handLevelY - 8, 200)
+            draggingObject!!.screenPos =
+                Vector3i((mouseX - offsetX).toInt(), this.height - gameLoop!!.handLevelY - 8, 200)
         }
         return false
     }
@@ -147,7 +187,6 @@ class GameScreen(component: Component) : Screen(component) {
 
         return super.mouseReleased(mouseX, mouseY, button)
     }
-
 
 
     fun orderHandByRank() {
@@ -197,7 +236,6 @@ class GameScreen(component: Component) : Screen(component) {
     }
 
 
-
     override fun renderBackground(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         this.renderTransparentBackground(guiGraphics)
         this.renderBg(guiGraphics, partialTick, mouseX, mouseY)
@@ -209,7 +247,14 @@ class GameScreen(component: Component) : Screen(component) {
 
         //Draw transparent line on top of gui, and bottom
         guiGraphics.fillGradient(0, scaledY - 3, this.width, scaledY, -1072689136, -804253680)
-        guiGraphics.fillGradient(0, scaledY + this.imageHeight, this.width, scaledY + this.imageHeight + 3, -1072689136, -804253680)
+        guiGraphics.fillGradient(
+            0,
+            scaledY + this.imageHeight,
+            this.width,
+            scaledY + this.imageHeight + 3,
+            -1072689136,
+            -804253680
+        )
 
         //Draw texture
         guiGraphics.blit(
@@ -223,7 +268,7 @@ class GameScreen(component: Component) : Screen(component) {
         return false
     }
 
-    companion object{
+    companion object {
         var screen: GameScreen? = null
 
         fun openScreen(player: Player) {

@@ -14,8 +14,8 @@ class CardObject {
     var isHolding: Boolean = false
     var isSelected: Boolean = false
 
-    var screenPos = Vector3i(0,0,0)
-    var targetScreenPos = Vector3i(0,0,0)
+    var screenPos = Vector3i(0, 0, 0)
+    var targetScreenPos = Vector3i(0, 0, 0)
 
     var rotationY: Float = 180f // Initial rotation is 0 degrees (face down)
     var targetRotationY: Float = 0f // Target rotation is 180 degrees (face up)

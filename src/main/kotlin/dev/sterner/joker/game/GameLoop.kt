@@ -2,7 +2,7 @@ package dev.sterner.joker.game
 
 import dev.sterner.joker.component.JokerComponents
 import dev.sterner.joker.component.PlayerDeckComponent
-import dev.sterner.joker.core.*
+import dev.sterner.joker.core.Card
 import net.minecraft.client.Minecraft
 import org.joml.Vector3i
 import kotlin.math.abs
@@ -26,7 +26,6 @@ class GameLoop(val component: PlayerDeckComponent) {
         for (cardObject in hand) {
             if (!cardObject.isHolding) {
                 cardObject.tick(Minecraft.getInstance().timer.gameTimeDeltaTicks)
-                //JokerComponents.DECK.sync(component.player)
             }
         }
 
@@ -59,7 +58,8 @@ class GameLoop(val component: PlayerDeckComponent) {
             val index = handDSize
             val yOffset = ((centerIndex - abs(index - centerIndex)) / centerIndex) * arcHeight
 
-            val pos = Vector3i(handLevelX + point[handDSize], this.screenHeight - handLevelY - yOffset.toInt(), handDSize * 4)
+            val pos =
+                Vector3i(handLevelX + point[handDSize], this.screenHeight - handLevelY - yOffset.toInt(), handDSize * 4)
 
             gameSubStageCounter++
             if (gameSubStageCounter >= 20 * 0.2) {
@@ -79,11 +79,7 @@ class GameLoop(val component: PlayerDeckComponent) {
             }
         }
 
-        if (handSize == totalHandSize) {
-            return true
-        }
-
-        return false
+        return handSize == totalHandSize
     }
 
     fun tickOnChoice(gameDeck: MutableList<Card>, totalHandSize: Int): Boolean {
@@ -97,17 +93,16 @@ class GameLoop(val component: PlayerDeckComponent) {
         val arcHeight = 6 // Maximum height adjustment for the arc
         val centerIndex = (hand.size - 1) / 2.0 // Center index for the arc
 
-        var counter = 0
-        for (space in point) {
+        for ((counter, space) in point.withIndex()) {
             val bl: Boolean = hand[counter].isSelected
             val yOffset = ((centerIndex - Math.abs(counter - centerIndex)) / centerIndex) * arcHeight
 
-            var pos = Vector3i(handLevelX + space, this.screenHeight - handLevelY - yOffset.toInt(), counter * 10)
-            if (bl) {
-                pos = Vector3i(pos.x, pos.y - 8, pos.z)
-            }
+            val pos = Vector3i(
+                handLevelX + space,
+                this.screenHeight - handLevelY - yOffset.toInt() - if (bl) 8 else 0,
+                counter * 10
+            )
             hand[counter].targetScreenPos = pos
-            counter++
         }
     }
 
@@ -122,56 +117,6 @@ class GameLoop(val component: PlayerDeckComponent) {
 
         return points
     }
-
-    fun sellCard(card: Card): JokerContext {
-        return JokerContext()
-    }
-
-    fun useTarot(tarot: Tarot): JokerContext {
-        return JokerContext()
-    }
-
-    fun usePlanet(planet: Planet): JokerContext {
-        return JokerContext()
-    }
-
-    fun sortByRank(hand: List<Card>): List<Card> {
-        return hand.sortedWith(compareByDescending<Card> { it.rank })
-    }
-
-    fun sortBySuit(hand: List<Card>): List<Card> {
-        return hand.sortedWith(compareByDescending<Card> { it.suit })
-    }
-
-    fun evaluateCard(card: Card): JokerContext {
-        return JokerContext()
-    }
-
-    fun checkJoker(card: Card, joker: Joker): JokerContext {
-        return JokerContext()
-    }
-
-    fun checkJoker(playedHand: List<Card>, joker: Joker): JokerContext {
-        return JokerContext()
-    }
-
-    fun checkHand(hand: List<Card>, joker: Joker): JokerContext {
-        return JokerContext()
-    }
-
-    fun triggerBlindAbility(blind: Blind): JokerContext {
-        return JokerContext()
-    }
-
-    fun checkStamp(card: Card): JokerContext {
-        return JokerContext()
-    }
-
-    fun checkSpecial(card: Card): JokerContext {
-        return JokerContext()
-    }
-
-
 
     fun reset() {
         gameStage = GameStage.NONE

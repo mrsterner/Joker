@@ -1,19 +1,17 @@
 package dev.sterner.joker.component
 
-import dev.sterner.joker.JokerMod
 import dev.sterner.joker.core.Card
-import dev.sterner.joker.core.GameUtils
 import dev.sterner.joker.game.CardObject
 import dev.sterner.joker.game.GameLoop
+import dev.sterner.joker.game.GameUtils
 import net.minecraft.client.Minecraft
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent
 import org.ladysnake.cca.api.v3.component.tick.ClientTickingComponent
-import org.ladysnake.cca.api.v3.component.tick.CommonTickingComponent
 
-class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, ClientTickingComponent  {
+class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, ClientTickingComponent {
 
     //Stored player deck
     var deck: MutableList<Card> = GameUtils.createStandardDeck()
@@ -68,8 +66,6 @@ class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, ClientTicki
         GameUtils.writeGameLoop(tag, gameLoop)
         tag.putBoolean("GameOn", gameOn)
     }
-
-
 
 
 }
