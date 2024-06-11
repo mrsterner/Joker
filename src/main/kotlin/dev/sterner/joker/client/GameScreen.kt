@@ -33,6 +33,7 @@ class GameScreen(component: Component) : Screen(component) {
     var draggingObject: CardObject? = null
     var offsetX = 0.0
     var offsetY = 0.0
+    var dragThreshold = 5
 
     //From Component
     var deck: MutableList<Card>? = null
@@ -60,6 +61,9 @@ class GameScreen(component: Component) : Screen(component) {
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
 
+    private var initialMouseX = 0.0
+    private var initialMouseY = 0.0
+
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (button == 0) {
             var highestZObject: CardObject? = null
@@ -82,9 +86,11 @@ class GameScreen(component: Component) : Screen(component) {
             // If a card with the highest z-coordinate is found, set it as the dragging object
             if (highestZObject != null) {
                 draggingObject = highestZObject
-                draggingObject!!.isHolding = true
+                initialMouseX = mouseX
+                initialMouseY = mouseY
                 offsetX = mouseX - highestZObject.screenPos.x
                 offsetY = mouseY - highestZObject.screenPos.y
+                draggingObject!!.isHolding = true
             }
         }
         return super.mouseClicked(mouseX, mouseY, button)
@@ -92,6 +98,14 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
         if (button == 0 && draggingObject != null) {
+            val dx = mouseX - initialMouseX
+            val dy = mouseY - initialMouseY
+
+            // Check if the drag distance exceeds the threshold
+            if (dx * dx + dy * dy > dragThreshold * dragThreshold) {
+                isDragging = true
+            }
+
             draggingObject!!.screenPos = Vector3i((mouseX - offsetX).toInt(), this.height - gameLoop!!.handLevelY - 8, 200)
         }
         return false
@@ -102,10 +116,17 @@ class GameScreen(component: Component) : Screen(component) {
             val vec = draggingObject!!.screenPos
             draggingObject!!.screenPos = Vector3i(vec.x, vec.y, 0)
             draggingObject!!.isHolding = false
+
+            // Only set isSelected if not dragging
+            if (!isDragging) {
+                draggingObject!!.isSelected = !draggingObject!!.isSelected
+            }
+
             draggingObject = null
             gameLoop!!.reorderHand()
         }
 
+        isDragging = false
         offsetX = 0.0
         offsetY = 0.0
 
@@ -129,19 +150,33 @@ class GameScreen(component: Component) : Screen(component) {
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.render(guiGraphics, mouseX, mouseY, partialTick)
-        val quaternionf = Quaternionf().rotateZ(Math.PI.toFloat())
-        val quaternionf2 = Quaternionf().rotateX(1 * (Math.PI.toFloat() / 180))
-        quaternionf.mul(quaternionf2)
 
-        for (cardObject in gameLoop!!.hand) {
+        val handSize = gameLoop!!.hand.size
+        val arcAngle = 10f // Total angle for the arc
+        val centerIndex = (handSize - 1) / 2.0 // Center index for the arc
+
+        for (i in gameLoop!!.hand.indices) {
+            val cardObject = gameLoop!!.hand[i]
+            val angleOffset = ((i - centerIndex) / handSize) * arcAngle
+
+            // Create quaternion for rotation
+            val quaternionf = Quaternionf().rotateZ(Math.toRadians(angleOffset).toFloat())
+
             GameUtils.renderCard(guiGraphics, cardObject.screenPos, 16f, quaternionf, cardObject, partialTick)
         }
-        quaternionf.mul(Axis.YP.rotationDegrees(180f))
+
+        val quaternionf = Quaternionf().rotateY(Math.PI.toFloat())
 
         for (index in 1 until 5) {
-            GameUtils.renderCard(guiGraphics, Vector3d(this.width - 50.0 + (index / 2),this.height - 40.0 + (index / 2), index.toDouble()), 16f, quaternionf, backside, partialTick)
+            GameUtils.renderCard(
+                guiGraphics,
+                Vector3d(this.width - 20.0 + (index / 2), this.height - 20.0 - (index / 2), index.toDouble()),
+                16f,
+                quaternionf,
+                backside,
+                partialTick
+            )
         }
-
     }
 
 

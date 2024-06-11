@@ -23,7 +23,6 @@ class GameLoop(val component: PlayerDeckComponent) {
     var handSize = 0
 
     fun tick() {
-
         for (cardObject in hand) {
             if (!cardObject.isHolding) {
                 cardObject.tick(Minecraft.getInstance().timer.gameTimeDeltaTicks)
@@ -51,23 +50,29 @@ class GameLoop(val component: PlayerDeckComponent) {
     }
 
     fun tickOnNone(gameDeck: MutableList<Card>, totalHandSize: Int, gameStageCounter: Int): Boolean {
-
-
         if (handSize < totalHandSize) {
-
             val point = calculateEquallySpacedPoints(totalHandSize)
-            val pos = Vector3i(handLevelX + point[handSize], this.screenHeight - handLevelY, handSize * 4)
+            val handDSize = hand.size
+            val arcHeight = 10 // Maximum height adjustment for the arc
+            val centerIndex = (totalHandSize - 1) / 2.0 // Center index for the arc
+            val arcAngle = 10f // Total angle for the arc
+
+            val index = handDSize
+            val angleOffset = ((index - centerIndex) / totalHandSize) * arcAngle
+            val yOffset = ((centerIndex - Math.abs(index - centerIndex)) / centerIndex) * arcHeight
+
+            val pos = Vector3i(handLevelX + point[handDSize], this.screenHeight - handLevelY - yOffset.toInt(), handDSize * 4)
 
             gameSubStageCounter++
-            if (gameSubStageCounter >= 20 * 1) {
+            if (gameSubStageCounter >= 20 * 0.25) {
                 gameSubStageCounter = 0
                 val card = component.pickRandomCardAndRemove(gameDeck)
                 val cardEntity = CardObject()
                 cardEntity.card = card
-                cardEntity.screenPos = Vector3i(this.screenWidth - 50,this.screenHeight - 40,0)
+                cardEntity.screenPos = Vector3i(this.screenWidth - 50, this.screenHeight - 40, 0)
                 cardEntity.targetScreenPos = pos
 
-                println("TargetPos: ${formatVector3i(cardEntity.targetScreenPos)} : $handSize : ${component.player.level().isClientSide}")
+                println("TargetPos: ${formatVector3i(cardEntity.targetScreenPos)} : $handDSize : ${component.player.level().isClientSide}")
 
                 hand.add(cardEntity)
                 handSize++
@@ -80,7 +85,6 @@ class GameLoop(val component: PlayerDeckComponent) {
             return true
         }
 
-
         return false
     }
 
@@ -92,9 +96,18 @@ class GameLoop(val component: PlayerDeckComponent) {
         hand.sortBy { it.screenPos.x }
         JokerComponents.DECK.sync(component.player)
         val point: List<Int> = calculateEquallySpacedPoints(component.totalHandSize)
+        val arcHeight = 10 // Maximum height adjustment for the arc
+        val centerIndex = (hand.size - 1) / 2.0 // Center index for the arc
+
         var counter = 0
         for (space in point) {
-            val pos = Vector3i(handLevelX + space, this.screenHeight - handLevelY, counter * 10)
+            val bl: Boolean = hand[counter].isSelected
+            val yOffset = ((centerIndex - Math.abs(counter - centerIndex)) / centerIndex) * arcHeight
+
+            var pos = Vector3i(handLevelX + space, this.screenHeight - handLevelY - yOffset.toInt(), counter * 10)
+            if (bl) {
+                pos = Vector3i(pos.x, pos.y - 8, pos.z)
+            }
             hand[counter].targetScreenPos = pos
             counter++
         }
