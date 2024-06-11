@@ -17,19 +17,30 @@ class GameLoop(val component: PlayerDeckComponent) {
     var screenWidth = Minecraft.getInstance().window.guiScaledWidth
 
     var hand: MutableList<CardObject> = ArrayList()
+    var playedHand: MutableList<CardObject> = ArrayList()
+
     var handLevelY = 40
     var handLevelX = 128 + 32
+
+    var playedHandLevelY = 96 + 32
+    var playedHandLevelX = 128 + 72
 
     var handSize = 0
 
     var isDiscarding = false
     var isPlaying = false
     var discardAnimationTick = 0
+    var playAnimationTick = 0
 
     var orderByRank = true
 
     fun tick() {
         for (cardObject in hand) {
+            if (!cardObject.isHolding) {
+                cardObject.tick(Minecraft.getInstance().timer.gameTimeDeltaTicks)
+            }
+        }
+        for (cardObject in playedHand) {
             if (!cardObject.isHolding) {
                 cardObject.tick(Minecraft.getInstance().timer.gameTimeDeltaTicks)
             }
@@ -52,7 +63,7 @@ class GameLoop(val component: PlayerDeckComponent) {
                 endTickOnChoice(component.gameDeck, component.totalHandSize)
                 gameStage = GameStage.RESTOCK_PHASE
                 isDiscarding = false
-                isPlaying = false
+
             }
         }
 
@@ -61,10 +72,33 @@ class GameLoop(val component: PlayerDeckComponent) {
             val bl: Boolean = tickOnNone(component.gameDeck, component.totalHandSize)
             if (bl && gameStageCounter >= gameStage.time) {
                 gameStageCounter = 0
-                gameStage = GameStage.CHOICE_PHASE
+                if (isPlaying) {
+                    isPlaying = false
+                    gameStage = GameStage.PLAY_PHASE
+                } else {
+                    gameStage = GameStage.CHOICE_PHASE
+                }
+
                 reorderHandByRankOrSuit()
             }
         }
+
+        if (gameStage == GameStage.PLAY_PHASE) {
+            gameStageCounter++
+            val bl: Boolean = tickOnPlay(component.gameDeck, component.totalHandSize)
+            if (bl && gameStageCounter >= gameStage.time) {
+                gameStageCounter = 0
+                gameStage = GameStage.CHOICE_PHASE
+
+            }
+        }
+    }
+
+    private fun tickOnPlay(gameDeck: MutableList<Card>, totalHandSize: Int): Boolean {
+
+
+
+        return false
     }
 
     fun reorderHandByRankOrSuit() {
@@ -142,6 +176,27 @@ class GameLoop(val component: PlayerDeckComponent) {
             }
         }
 
+        if (isPlaying) {
+            playAnimationTick++
+            if (playAnimationTick == 1) {
+                hand.removeAll { it.isSelected.also { isSelected -> if (isSelected) playedHand.add(it) } }
+
+                for (cardObject in playedHand) {
+                    handSize--
+                    cardObject.isSelected = false
+                    cardObject.rotationZ = 0f
+                    cardObject.targetRotationZ = 0f
+                }
+
+                reorderHandByPos(playedHand, playedHandLevelY, false, screenWidth / 6, playedHandLevelX)
+                reorderHandByPos()
+
+
+            }
+            return true
+
+        }
+
         return false
     }
 
@@ -155,9 +210,9 @@ class GameLoop(val component: PlayerDeckComponent) {
 
         if (isPlaying) {
 
+            isPlaying = false
+
         }
-
-
     }
 
     fun discardSelectedCards() {
@@ -179,19 +234,23 @@ class GameLoop(val component: PlayerDeckComponent) {
     }
 
     fun reorderHandByPos() {
+        reorderHandByPos(hand, handLevelY, true, (this.screenWidth / 2.5).toInt(), handLevelX)
+    }
+
+    fun reorderHandByPos(hand: MutableList<CardObject>, handYLevel: Int, arch: Boolean, width: Int, playedHandLevelX: Int){
         hand.sortBy { it.screenPos.x }
         JokerComponents.DECK.sync(component.player)
-        val point: List<Int> = calculateEquallySpacedPoints(handSize)
+        val point: List<Int> = calculateEquallySpacedPoints(hand.size, width)
         val arcHeight = 6 // Maximum height adjustment for the arc
         val centerIndex = (hand.size - 1) / 2.0 // Center index for the arc
 
         for ((counter, space) in point.withIndex()) {
             val bl: Boolean = hand[counter].isSelected
-            val yOffset = ((centerIndex - Math.abs(counter - centerIndex)) / centerIndex) * arcHeight
+            val yOffset = if(arch) ((centerIndex - Math.abs(counter - centerIndex)) / centerIndex) * arcHeight else 0
 
             val pos = Vector3i(
-                handLevelX + space,
-                this.screenHeight - handLevelY - yOffset.toInt() - if (bl) 8 else 0,
+                playedHandLevelX + space,
+                this.screenHeight - handYLevel - yOffset.toInt() - if (bl) 12 else 0,
                 counter * 10
             )
             hand[counter].targetScreenPos = pos
@@ -199,7 +258,10 @@ class GameLoop(val component: PlayerDeckComponent) {
     }
 
     fun calculateEquallySpacedPoints(handSize: Int): List<Int> {
-        val width = (this.screenWidth / 2.5).toInt()
+        return calculateEquallySpacedPoints(handSize, (this.screenWidth / 2.5).toInt())
+    }
+
+    fun calculateEquallySpacedPoints(handSize: Int, width: Int): List<Int> {
         val spacing = width / (handSize - 1)
 
         val points = mutableListOf<Int>()

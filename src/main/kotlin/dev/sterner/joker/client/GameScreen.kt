@@ -205,15 +205,6 @@ class GameScreen(component: Component) : Screen(component) {
         return super.mouseReleased(mouseX, mouseY, button)
     }
 
-
-    fun orderHandByRank() {
-        gameLoop!!.hand.sortBy { it.card.rank }
-    }
-
-    fun orderHandBySuit() {
-        gameLoop!!.hand.sortBy { it.card.suit }
-    }
-
     override fun tick() {
         super.tick()
         this.gameLoop = JokerComponents.DECK.get(player!!).gameLoop
@@ -232,6 +223,16 @@ class GameScreen(component: Component) : Screen(component) {
 
             // Create quaternion for rotation
             val quaternionf = Quaternionf().rotateZ(Math.toRadians(angleOffset + 180 + cardObject.rotationZ.toDouble()).toFloat())
+            val quaternionfY = Quaternionf().rotateY(Math.toRadians(cardObject.rotationY.toDouble()).toFloat())
+            quaternionf.mul(quaternionfY)
+
+            GameUtils.renderCard(guiGraphics, cardObject.screenPos, 16f, quaternionf, cardObject, partialTick)
+        }
+
+        for (i in gameLoop!!.playedHand.indices) {
+            val cardObject = gameLoop!!.playedHand[i]
+
+            val quaternionf = Quaternionf().rotateZ(Math.toRadians(180 + cardObject.rotationZ.toDouble()).toFloat())
             val quaternionfY = Quaternionf().rotateY(Math.toRadians(cardObject.rotationY.toDouble()).toFloat())
             quaternionf.mul(quaternionfY)
 

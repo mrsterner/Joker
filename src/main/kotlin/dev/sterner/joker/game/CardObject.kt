@@ -42,12 +42,16 @@ class CardObject {
         if (screenPos != targetScreenPos) {
             if (!isDiscarded) {
                 screenPos = lerp(screenPos, targetScreenPos, fl)
-                rotationY = Mth.lerp(fl, rotationY, targetRotationY)
             } else {
                 screenPos = lerpArc(screenPos, targetScreenPos, fl)
-                rotationZ = Mth.lerp(fl, rotationZ, targetRotationZ)
             }
             
+        }
+        if (rotationZ != targetRotationZ) {
+            rotationZ = Mth.lerp(fl, rotationZ, targetRotationZ)
+        }
+        if (rotationY != targetRotationY) {
+            rotationY = Mth.lerp(fl, rotationY, targetRotationY)
         }
     }
 

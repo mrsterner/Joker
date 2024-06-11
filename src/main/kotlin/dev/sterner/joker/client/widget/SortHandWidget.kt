@@ -31,7 +31,7 @@ class SortHandWidget(screen: GameScreen, val rank: Boolean, x: Int, y: Int, widt
             screen.gameLoop?.orderByRank = false
         }
         screen.gameLoop?.reorderHandByRankOrSuit()
-        //TODO Open Options Screen
+
         super.onClick(mouseX, mouseY)
     }
 }
