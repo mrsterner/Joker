@@ -5,6 +5,7 @@ import dev.sterner.joker.component.PlayerDeckComponent
 import dev.sterner.joker.core.*
 import net.minecraft.client.Minecraft
 import org.joml.Vector3i
+import kotlin.math.abs
 
 class GameLoop(val component: PlayerDeckComponent) {
 
@@ -56,7 +57,7 @@ class GameLoop(val component: PlayerDeckComponent) {
             val centerIndex = (totalHandSize - 1) / 2.0 // Center index for the arc
 
             val index = handDSize
-            val yOffset = ((centerIndex - Math.abs(index - centerIndex)) / centerIndex) * arcHeight
+            val yOffset = ((centerIndex - abs(index - centerIndex)) / centerIndex) * arcHeight
 
             val pos = Vector3i(handLevelX + point[handDSize], this.screenHeight - handLevelY - yOffset.toInt(), handDSize * 4)
 
@@ -68,6 +69,8 @@ class GameLoop(val component: PlayerDeckComponent) {
                 cardEntity.card = card
                 cardEntity.screenPos = Vector3i(this.screenWidth - 50, this.screenHeight - 40, 20)
                 cardEntity.targetScreenPos = pos
+
+                println(yOffset)
 
                 hand.add(cardEntity)
                 handSize++
