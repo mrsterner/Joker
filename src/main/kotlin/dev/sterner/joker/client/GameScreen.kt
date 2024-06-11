@@ -52,57 +52,74 @@ class GameScreen(component: Component) : Screen(component) {
         val scaledX = (this.width - this.imageWidth) / 2
         val scaledY = (this.height - this.imageHeight) / 2
 
-        this.addRenderableWidget(StartGameWidget(scaledX, scaledY, 16, 16, Component.literal("Debug Start Run")))
+        this.addRenderableWidget(
+            StartGameWidget(
+                this,
+                scaledX,
+                scaledY,
+                16,
+                16
+            )
+        )
 
         this.addRenderableWidget(
             RunInfoWidget(
+                this,
                 scaledX + 16,
                 scaledY + 180 - 40 + 19,
                 31,
-                21,
-                Component.literal("Run Info")
+                21
             )
         )
-        this.addRenderableWidget(OptionsWidget(scaledX + 16, scaledY + 180 + 7, 31, 21, Component.literal("Options")))
+
+        this.addRenderableWidget(
+            OptionsWidget(
+                this,
+                scaledX + 16,
+                scaledY + 180 + 7,
+                31,
+                21
+            )
+        )
 
         this.addRenderableWidget(
             PlayHandWidget(
+                this,
                 scaledX + 16 + 150,
                 scaledY + 180 + 20,
                 33,
-                22,
-                Component.literal("Play Hand")
+                22
             )
         )
         this.addRenderableWidget(
             DiscardHandWidget(
+                this,
                 scaledX + 16 + 55 + 150,
                 scaledY + 180 + 20,
                 33,
-                22,
-                Component.literal("Discard Hand")
+                22
             )
         )
 
 
         this.addRenderableWidget(
             SortHandWidget(
+                this,
                 true,
                 scaledX + 16 + 150 + 37,
                 scaledY + 180 + 22,
                 14,
-                8,
-                Component.literal("Sort Rank")
+                8
             )
         )
         this.addRenderableWidget(
             SortHandWidget(
+                this,
                 false,
                 scaledX + 16 + 150 + 37,
                 scaledY + 180 + 32,
                 14,
-                8,
-                Component.literal("Sort Suit")
+                8
             )
         )
     }
@@ -214,7 +231,7 @@ class GameScreen(component: Component) : Screen(component) {
             val angleOffset = ((i - centerIndex) / handSize) * arcAngle
 
             // Create quaternion for rotation
-            val quaternionf = Quaternionf().rotateZ(Math.toRadians(angleOffset + 180).toFloat())
+            val quaternionf = Quaternionf().rotateZ(Math.toRadians(angleOffset + 180 + cardObject.rotationZ.toDouble()).toFloat())
             val quaternionfY = Quaternionf().rotateY(Math.toRadians(cardObject.rotationY.toDouble()).toFloat())
             quaternionf.mul(quaternionfY)
 

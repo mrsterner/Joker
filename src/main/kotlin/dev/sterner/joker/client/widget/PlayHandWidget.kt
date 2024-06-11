@@ -2,15 +2,12 @@ package dev.sterner.joker.client.widget
 
 import com.mojang.blaze3d.systems.RenderSystem
 import dev.sterner.joker.JokerMod
+import dev.sterner.joker.client.GameScreen
 import net.minecraft.client.gui.GuiGraphics
-import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.components.WidgetSprites
-import net.minecraft.client.gui.narration.NarrationElementOutput
-import net.minecraft.network.chat.Component
 
-class PlayHandWidget(x: Int, y: Int, width: Int, height: Int, message: Component) : AbstractWidget(
-    x, y, width, height,
-    message
+class PlayHandWidget(screen: GameScreen, x: Int, y: Int, width: Int, height: Int) : AbstractGameWidget(
+    screen, x, y, width, height
 ) {
 
     val SPRITES: WidgetSprites = WidgetSprites(
@@ -26,8 +23,9 @@ class PlayHandWidget(x: Int, y: Int, width: Int, height: Int, message: Component
         RenderSystem.disableBlend()
     }
 
-    override fun updateWidgetNarration(narrationElementOutput: NarrationElementOutput) {
+    override fun onClick(mouseX: Double, mouseY: Double) {
 
+
+        super.onClick(mouseX, mouseY)
     }
-
 }

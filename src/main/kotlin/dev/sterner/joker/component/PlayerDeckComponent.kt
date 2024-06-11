@@ -25,6 +25,12 @@ class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, ClientTicki
     var gameOn: Boolean = false
     var gameLoop: GameLoop = GameLoop(this)
 
+    var maxHands: Int = 4
+    var hands: Int = maxHands
+    var maxDiscards: Int = 0
+    var discards: Int = maxDiscards
+    var money: Int = 0
+
     override fun clientTick() {
         if (gameOn) {
             gameLoop.tick()
@@ -59,13 +65,17 @@ class PlayerDeckComponent(val player: Player) : AutoSyncedComponent, ClientTicki
         }
 
         gameOn = tag.getBoolean("GameOn")
+        hands = tag.getInt("Hands")
+        discards = tag.getInt("Discards")
+        money = tag.getInt("Money")
     }
 
     override fun writeToNbt(tag: CompoundTag, registryLookup: HolderLookup.Provider) {
         GameUtils.writeDeckToTag(tag, deck)
         GameUtils.writeGameLoop(tag, gameLoop)
         tag.putBoolean("GameOn", gameOn)
+        tag.putInt("Hands", hands)
+        tag.putInt("Discards", discards)
+        tag.putInt("Money", money)
     }
-
-
 }

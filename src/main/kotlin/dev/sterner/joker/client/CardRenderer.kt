@@ -30,13 +30,8 @@ object CardRenderer {
     ) {
 
         poseStack.pushPose()
-        val gameTime = Minecraft.getInstance().level!!.gameTime
-
-
-        val i: Float = (gameTime + partialTick) / 20f
 
         poseStack.translate((31 / 16f) / 2f, (45f / 16f) / 1.15f, 0f)
-        //poseStack.mulPose(Axis.YP.rotation(i))
         poseStack.mulPose(Axis.YP.rotationDegrees(180f))
         poseStack.scale(1.0f, -1.0f, 1.0f)
 
@@ -74,22 +69,15 @@ object CardRenderer {
     }
 
     fun getFrontOverlayTexture(cardObject: CardObject): ResourceLocation {
-        if (cardObject.card != null) {
-            return JokerMod.id("textures/card/front_overlay/" + cardObject.getCardName(cardObject.card) + ".png")
-        }
-        return JokerMod.id("textures/card/front_overlay/ace_of_spades.png")
+        return JokerMod.id("textures/card/front_overlay/" + cardObject.getCardName(cardObject.card) + ".png")
     }
 
     fun getCardFrontTexture(cardObject: CardObject): ResourceLocation {
-        if (cardObject.card != null) {
-            //NONE, WILD, LUCKY, STEEL, GOLD
-            return JokerMod.id("textures/card/base/" + cardObject.getBaseName(cardObject.card) + ".png")
-        }
-        return JokerMod.id("textures/card/base/base.png")
+        return JokerMod.id("textures/card/base/" + cardObject.getBaseName(cardObject.card) + ".png")
     }
 
     fun getCardBackTexture(cardObject: CardObject): ResourceLocation {
-        return JokerMod.id("textures/card/base/base.png")
+        return JokerMod.id("textures/card/base/" + cardObject.getBaseName(cardObject.card) + ".png")
     }
 
     fun getBackOverlayTexture(cardObject: CardObject): ResourceLocation {
