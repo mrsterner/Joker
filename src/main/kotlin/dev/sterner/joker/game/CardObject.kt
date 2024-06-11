@@ -1,6 +1,7 @@
 package dev.sterner.joker.game
 
 import dev.sterner.joker.core.*
+import net.minecraft.util.Mth
 import org.joml.Vector3i
 import kotlin.math.roundToInt
 
@@ -15,6 +16,10 @@ class CardObject {
 
     var screenPos = Vector3i(0,0,0)
     var targetScreenPos = Vector3i(0,0,0)
+
+    var rotationY: Float = 180f // Initial rotation is 0 degrees (face down)
+    var targetRotationY: Float = 0f // Target rotation is 180 degrees (face up)
+
 
     fun getCardName(card: Card): String {
         return card.rank.name.lowercase() + "_of_" + card.suit.name.lowercase()
@@ -31,6 +36,7 @@ class CardObject {
         if (screenPos != targetScreenPos) {
             //println("y: " + screenPos.y + ", z: " + screenPos.z)
             screenPos = lerp(screenPos, targetScreenPos, fl)
+            rotationY = Mth.lerp(fl, rotationY, targetRotationY)
         }
     }
 

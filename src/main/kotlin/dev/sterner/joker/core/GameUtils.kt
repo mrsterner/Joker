@@ -172,7 +172,7 @@ object GameUtils {
         partialTick: Float
     ) {
         guiGraphics.pose().pushPose()
-        guiGraphics.pose().translate(pos.x - cardObject.width, pos.y - cardObject.height, 50.0 + pos.z)
+        guiGraphics.pose().translate(pos.x, pos.y, 50.0 + pos.z)
         guiGraphics.pose().scale(scale, scale, -scale)
         guiGraphics.pose().mulPose(pose)
         Lighting.setupLevel()

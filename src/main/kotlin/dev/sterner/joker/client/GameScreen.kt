@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Player
 import org.joml.Quaternionf
 import org.joml.Vector3d
+import org.joml.Vector3f
 import org.joml.Vector3i
 import java.util.function.Consumer
 
@@ -160,7 +161,9 @@ class GameScreen(component: Component) : Screen(component) {
             val angleOffset = ((i - centerIndex) / handSize) * arcAngle
 
             // Create quaternion for rotation
-            val quaternionf = Quaternionf().rotateZ(Math.toRadians(angleOffset).toFloat())
+            val quaternionf = Quaternionf().rotateZ(Math.toRadians(angleOffset + 180).toFloat())
+            val quaternionfY = Quaternionf().rotateY(Math.toRadians(cardObject.rotationY.toDouble()).toFloat())
+            quaternionf.mul(quaternionfY)
 
             GameUtils.renderCard(guiGraphics, cardObject.screenPos, 16f, quaternionf, cardObject, partialTick)
         }
@@ -170,7 +173,7 @@ class GameScreen(component: Component) : Screen(component) {
         for (index in 1 until 5) {
             GameUtils.renderCard(
                 guiGraphics,
-                Vector3d(this.width - 20.0 + (index / 2), this.height - 25.0 - (index / 2), index.toDouble()),
+                Vector3d(this.width - 20.0 + (index / 2), this.height - 65.0 - (index / 2), index.toDouble()),
                 16f,
                 quaternionf,
                 backside,

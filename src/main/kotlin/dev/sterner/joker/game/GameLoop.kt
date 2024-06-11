@@ -67,7 +67,7 @@ class GameLoop(val component: PlayerDeckComponent) {
                 val card = component.pickRandomCardAndRemove(gameDeck)
                 val cardEntity = CardObject()
                 cardEntity.card = card
-                cardEntity.screenPos = Vector3i(this.screenWidth - 50, this.screenHeight - 40, 0)
+                cardEntity.screenPos = Vector3i(this.screenWidth - 50, this.screenHeight - 40, 20)
                 cardEntity.targetScreenPos = pos
 
                 hand.add(cardEntity)
