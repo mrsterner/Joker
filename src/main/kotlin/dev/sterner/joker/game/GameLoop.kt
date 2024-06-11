@@ -9,7 +9,7 @@ import kotlin.math.abs
 
 class GameLoop(val component: PlayerDeckComponent) {
 
-    var gameStage: GameStage = GameStage.NONE
+    var gameStage: GameStage = GameStage.SETUP
     var gameStageCounter: Int = 0
     var gameSubStageCounter: Int = 0
 
@@ -34,12 +34,19 @@ class GameLoop(val component: PlayerDeckComponent) {
 
     var orderByRank = true
 
+    /**
+     * Game tick, this ticks cards and theirs position, rotation
+     * This also updates game stages
+     */
     fun tick() {
         updateCards(hand)
         updateCards(playedHand)
         updateGameStage()
     }
 
+    /**
+     * CardObjects have internal tick functions, they are hooked to the game tick here
+     */
     private fun updateCards(cards: List<CardObject>) {
         for (card in cards) {
             if (!card.isHolding) {
@@ -48,9 +55,12 @@ class GameLoop(val component: PlayerDeckComponent) {
         }
     }
 
+    /**
+     * Ticks the current GameStage
+     */
     private fun updateGameStage() {
         when (gameStage) {
-            GameStage.NONE -> handleNoneStage()
+            GameStage.SETUP -> handleSetupStage()
             GameStage.CHOICE_PHASE -> handleChoicePhase()
             GameStage.RESTOCK_PHASE -> handleRestockPhase()
             GameStage.PLAY_PHASE -> handlePlayPhase()
@@ -58,9 +68,12 @@ class GameLoop(val component: PlayerDeckComponent) {
         }
     }
 
-    private fun handleNoneStage() {
+    /**
+     * The initial stage of the game, will draw a hand in tickOnSetup
+     */
+    private fun handleSetupStage() {
         gameStageCounter++
-        if (tickOnNone(component.gameDeck, component.totalHandSize) && gameStageCounter >= gameStage.time) {
+        if (tickOnSetup(component.gameDeck, component.totalHandSize) && gameStageCounter >= gameStage.time) {
             gameStageCounter = 0
             endTickOn(gameStage)
             gameStage = GameStage.CHOICE_PHASE
@@ -68,6 +81,9 @@ class GameLoop(val component: PlayerDeckComponent) {
         }
     }
 
+    /**
+     * isDiscard and isPlaying is handled with respective widget and will trigger the choice phase's ticker
+     */
     private fun handleChoicePhase() {
         if (isDiscarding || isPlaying) {
             gameStageCounter++
@@ -80,37 +96,46 @@ class GameLoop(val component: PlayerDeckComponent) {
         }
     }
 
+    /**
+     * Selected at the end of a Choice phase to refill the hand with its capacity of cards
+     */
     private fun handleRestockPhase() {
         gameStageCounter++
-        if (tickOnNone(component.gameDeck, component.totalHandSize) && gameStageCounter >= gameStage.time) {
+        if (tickOnSetup(component.gameDeck, component.totalHandSize) && gameStageCounter >= gameStage.time) {
             gameStageCounter = 0
             endTickOn(gameStage)
-            gameStage = if (isPlaying) {
+            if (isPlaying) {
                 isPlaying = false
-                GameStage.PLAY_PHASE
+                gameStage = GameStage.PLAY_PHASE
             } else {
-                GameStage.CHOICE_PHASE
+                gameStage = GameStage.CHOICE_PHASE
             }
             startTickOn(gameStage)
-            reorderHandByRankOrSuit()
         }
     }
 
+    /**
+     * Cards in the playedHand runs their animation and activation here
+     */
     private fun handlePlayPhase() {
         gameStageCounter++
         if (tickOnPlay(component.gameDeck, component.totalHandSize) && gameStageCounter >= gameStage.time) {
             gameStageCounter = 0
             endTickOn(gameStage)
-            gameStage = GameStage.CHOICE_PHASE
+            gameStage = GameStage.EVAL_PHASE
             startTickOn(gameStage)
         }
     }
 
+    /**
+     * Depending on discarding or playing a set of selected cards, this will either play a discard animation and
+     * call for discard, or, ...
+     */
     private fun tickOnChoice(): Boolean {
         if (isDiscarding) {
             discardAnimationTick++
-            if (discardAnimationTick == 1) raiseSelectedCards()
             if (discardAnimationTick > 10) {
+                discardAnimationTick = 0
                 discardSelectedCards()
                 return true
             }
@@ -118,7 +143,7 @@ class GameLoop(val component: PlayerDeckComponent) {
 
         if (isPlaying) {
             playAnimationTick++
-            if (playAnimationTick == 1) {
+            if (playAnimationTick == 1) {//TODO move to startTickOn
                 moveSelectedCardsToPlayedHand()
                 reorderHandByPos(playedHand, playedHandLevelY, false, screenWidth / 6, playedHandLevelX)
                 reorderHandByPos()
@@ -145,7 +170,16 @@ class GameLoop(val component: PlayerDeckComponent) {
     }
 
     private fun startTickOn(gameStage: GameStage) {
+        if (gameStage == GameStage.PLAY_PHASE) {
+            reorderHandByRankOrSuit()
+        }
 
+        if (gameStage == GameStage.CHOICE_PHASE) {
+            reorderHandByRankOrSuit()
+            if (isDiscarding) {
+                raiseSelectedCards()
+            }
+        }
     }
 
     fun reorderHandByRankOrSuit() {
@@ -176,7 +210,7 @@ class GameLoop(val component: PlayerDeckComponent) {
         }
     }
 
-    private fun tickOnNone(gameDeck: MutableList<Card>, totalHandSize: Int): Boolean {
+    private fun tickOnSetup(gameDeck: MutableList<Card>, totalHandSize: Int): Boolean {
         fillHand(gameDeck, totalHandSize)
         return handSize == totalHandSize
     }
@@ -186,9 +220,8 @@ class GameLoop(val component: PlayerDeckComponent) {
             gameSubStageCounter++
             if (gameSubStageCounter >= 20 * 0.2) {
                 gameSubStageCounter = 0
-                val card = component.pickRandomCardAndRemove(gameDeck)
                 val cardEntity = CardObject()
-                cardEntity.card = card
+                cardEntity.card = component.pickRandomCardAndRemove(gameDeck)
                 cardEntity.screenPos = Vector3i(screenWidth - 50, screenHeight - 40, 20)
                 cardEntity.targetScreenPos = calculateTargetPosition(hand.size, totalHandSize)
                 hand.add(cardEntity)
@@ -263,11 +296,17 @@ class GameLoop(val component: PlayerDeckComponent) {
     }
 
     fun reset() {
-        gameStage = GameStage.NONE
+        gameStage = GameStage.SETUP
         gameStageCounter = 0
         gameSubStageCounter = 0
+        discardAnimationTick = 0
+        playAnimationTick = 0
         handSize = 0
         hand.clear()
+        playedHand.clear()
+        isDiscarding = false
+        isPlaying = false
+        orderByRank = true
     }
 
     /** Game loop
