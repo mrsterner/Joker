@@ -2,6 +2,8 @@ package dev.sterner.joker.client
 
 import com.mojang.math.Axis
 import dev.sterner.joker.JokerMod
+import dev.sterner.joker.client.widget.OptionsWidget
+import dev.sterner.joker.client.widget.RunInfoWidget
 import dev.sterner.joker.client.widget.StartGameWidget
 import dev.sterner.joker.component.JokerComponents
 import dev.sterner.joker.core.*
@@ -55,7 +57,10 @@ class GameScreen(component: Component) : Screen(component) {
         val scaledX = (this.width - this.imageWidth) / 2
         val scaledY = (this.height - this.imageHeight) / 2
 
-        this.addRenderableWidget(StartGameWidget(scaledX ,scaledY ,16, 16, Component.literal("Hello")))
+        this.addRenderableWidget(StartGameWidget(scaledX ,scaledY ,16, 16, Component.literal("Debug Start Run")))
+
+        this.addRenderableWidget(RunInfoWidget(scaledX + 16,scaledY + 180 - 40 + 19,31, 21, Component.literal("Run Info")))
+        this.addRenderableWidget(OptionsWidget(scaledX + 16,scaledY + 180 + 7,31, 21, Component.literal("Options")))
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
