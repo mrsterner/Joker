@@ -1,13 +1,12 @@
 package dev.sterner.joker.game
 
-import dev.sterner.joker.core.Card
-import dev.sterner.joker.core.Special
+import dev.sterner.joker.core.*
 import org.joml.Vector3i
 import kotlin.math.roundToInt
 
 class CardObject {
 
-    var card: Card? = null
+    var card: Card = Card(Suit.SPADES, Rank.ACE, Special.NONE, Stamp.NONE)
     val width: Int = 31
     val height: Int = 45
 

@@ -15,6 +15,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.world.entity.Entity
 import org.joml.Quaternionf
+import org.joml.Vector3d
 import org.joml.Vector3i
 import java.util.*
 
@@ -159,8 +160,19 @@ object GameUtils {
         cardObject: CardObject,
         partialTick: Float
     ) {
+        renderCard(guiGraphics, Vector3d(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble()), scale, pose, cardObject, partialTick)
+    }
+
+    fun renderCard(
+        guiGraphics: GuiGraphics,
+        pos: Vector3d,
+        scale: Float,
+        pose: Quaternionf?,
+        cardObject: CardObject,
+        partialTick: Float
+    ) {
         guiGraphics.pose().pushPose()
-        guiGraphics.pose().translate(pos.x.toDouble(), pos.y.toDouble(), 50.0 + pos.z.toDouble())
+        guiGraphics.pose().translate(pos.x, pos.y, 50.0 + pos.z)
         guiGraphics.pose().scale(scale, scale, -scale)
         guiGraphics.pose().mulPose(pose)
         Lighting.setupLevel()
@@ -169,20 +181,6 @@ object GameUtils {
         entityRenderDispatcher.setRenderShadow(false)
         RenderSystem.runAsFancy {
             CardRenderer.renderCard(cardObject, guiGraphics.pose(),guiGraphics.bufferSource() as MultiBufferSource, partialTick,0xF000F0)
-            /*
-            entityRenderDispatcher.render(
-                cardObject,
-                0.0,
-                0.0,
-                0.0,
-                0.0f,
-                partialTick,
-                guiGraphics.pose(),
-                guiGraphics.bufferSource() as MultiBufferSource,
-                0xF000F0
-            )
-
-             */
         }
         guiGraphics.flush()
         entityRenderDispatcher.setRenderShadow(true)
@@ -192,7 +190,7 @@ object GameUtils {
 
     fun writeCardObjectToTag(cardObject: CardObject): CompoundTag {
         var tag = CompoundTag()
-        writeCardToTag(cardObject.card!!, tag)
+        writeCardToTag(cardObject.card, tag)
 
         tag.putInt("X", cardObject.screenPos.x)
         tag.putInt("Y", cardObject.screenPos.y)

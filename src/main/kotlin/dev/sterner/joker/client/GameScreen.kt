@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Player
 import org.joml.Quaternionf
+import org.joml.Vector3d
 import org.joml.Vector3i
 import java.util.function.Consumer
 
@@ -34,7 +35,6 @@ class GameScreen(component: Component) : Screen(component) {
     var offsetY = 0.0
 
     //From Component
-    var handSize = 8
     var deck: MutableList<Card>? = null
 
     var backside = CardObject()
@@ -45,10 +45,7 @@ class GameScreen(component: Component) : Screen(component) {
         val components = JokerComponents.DECK.get(player)
         this.deck = components.gameDeck
         this.gameLoop = components.gameLoop
-        var co = this.deck!!.get(0)
-        var cardo = CardObject()
-        cardo.card = co
-        this.backside = cardo
+        this.backside = CardObject()
     }
 
     override fun init() {
@@ -118,19 +115,16 @@ class GameScreen(component: Component) : Screen(component) {
 
 
     fun orderHandByRank() {
-        gameLoop!!.hand?.sortBy { it.card?.rank }
+        gameLoop!!.hand.sortBy { it.card.rank }
     }
 
     fun orderHandBySuit() {
-        gameLoop!!.hand?.sortBy { it.card?.suit }
+        gameLoop!!.hand.sortBy { it.card.suit }
     }
 
     override fun tick() {
         super.tick()
         this.gameLoop = JokerComponents.DECK.get(player!!).gameLoop
-        for (cardObject in gameLoop!!.hand) {
-            //println(cardObject.targetPos)
-        }
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -144,7 +138,10 @@ class GameScreen(component: Component) : Screen(component) {
         }
         quaternionf.mul(Axis.YP.rotationDegrees(180f))
 
-        GameUtils.renderCard(guiGraphics, Vector3i(this.width - 50,this.height - 40,0), 16f, quaternionf, backside, partialTick)
+        for (index in 1 until 5) {
+            GameUtils.renderCard(guiGraphics, Vector3d(this.width - 50.0 + (index / 2),this.height - 40.0 + (index / 2), index.toDouble()), 16f, quaternionf, backside, partialTick)
+        }
+
     }
 
 
