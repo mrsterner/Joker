@@ -134,16 +134,18 @@ class GameLoop(val component: PlayerDeckComponent) {
     private fun tickOnChoice(): Boolean {
         if (isDiscarding) {
             discardAnimationTick++
-            if (discardAnimationTick > 10) {
-                discardAnimationTick = 0
-                discardSelectedCards()
-                return true
+            if (discardAnimationTick == 1) {
+                raiseSelectedCards()
             }
+            if (discardAnimationTick == 10) {
+                discardSelectedCards()
+            }
+            return true
         }
 
         if (isPlaying) {
             playAnimationTick++
-            if (playAnimationTick == 1) {//TODO move to startTickOn
+            if (playAnimationTick == 1) {
                 moveSelectedCardsToPlayedHand()
                 reorderHandByPos(playedHand, playedHandLevelY, false, screenWidth / 6, playedHandLevelX)
                 reorderHandByPos()
@@ -176,9 +178,6 @@ class GameLoop(val component: PlayerDeckComponent) {
 
         if (gameStage == GameStage.CHOICE_PHASE) {
             reorderHandByRankOrSuit()
-            if (isDiscarding) {
-                raiseSelectedCards()
-            }
         }
     }
 
