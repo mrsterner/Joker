@@ -23,8 +23,14 @@ class PlayHandWidget(screen: GameScreen, x: Int, y: Int, width: Int, height: Int
         RenderSystem.enableBlend()
         guiGraphics.blitSprite(SPRITES[false, this.isHoveredOrFocused], this.x, this.y, this.width, this.height)
         guiGraphics.pose().pushPose()
-        guiGraphics.pose().scale(0.66f, 0.66f, 1.0f)
-        guiGraphics.drawCenteredString(Minecraft.getInstance().font, Component.literal("Play Hand"), (this.x * 1.5).toInt() + width - 4, (this.y * 1.5).toInt() + height - 6, 0xFFFFFF)
+        guiGraphics.pose().scale(0.58f, 0.58f, 1.0f)
+        guiGraphics.drawCenteredString(
+            Minecraft.getInstance().font,
+            Component.literal("Play Hand"),
+            (this.x * 1.75).toInt() + width - 8,
+            (this.y * 1.75).toInt() + height - 12,
+            0xFFFFFF
+        )
         guiGraphics.pose().popPose()
         RenderSystem.disableBlend()
     }

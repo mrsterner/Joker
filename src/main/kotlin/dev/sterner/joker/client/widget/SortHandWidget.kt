@@ -3,8 +3,10 @@ package dev.sterner.joker.client.widget
 import com.mojang.blaze3d.systems.RenderSystem
 import dev.sterner.joker.JokerMod
 import dev.sterner.joker.client.GameScreen
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.WidgetSprites
+import net.minecraft.network.chat.Component
 
 class SortHandWidget(screen: GameScreen, val rank: Boolean, x: Int, y: Int, width: Int, height: Int) : AbstractGameWidget(
     screen, x, y, width, height
@@ -20,6 +22,16 @@ class SortHandWidget(screen: GameScreen, val rank: Boolean, x: Int, y: Int, widt
     override fun renderWidget(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         RenderSystem.enableBlend()
         guiGraphics.blitSprite(SPRITES[false, this.isHoveredOrFocused], this.x, this.y, this.width, this.height)
+        guiGraphics.pose().pushPose()
+        guiGraphics.pose().scale(0.5f, 0.5f, 1.0f)
+        guiGraphics.drawCenteredString(
+            Minecraft.getInstance().font,
+            Component.literal(if (rank) "Rank" else "Suit"),
+            (this.x * 2).toInt() + width - 1,
+            (this.y * 2).toInt() + height - 5,
+            0xFFFFFF
+        )
+        guiGraphics.pose().popPose()
         RenderSystem.disableBlend()
     }
 
