@@ -34,6 +34,10 @@ class GameLoop(val component: PlayerDeckComponent) {
 
     var orderByRank = true
 
+    //Magic numbers
+    private val discardTick: Int = 10
+    val arcHeight = 6 // Maximum height adjustment for the arc
+
     /**
      * Game tick, this ticks cards and theirs position, rotation
      * This also updates game stages
@@ -128,6 +132,14 @@ class GameLoop(val component: PlayerDeckComponent) {
     }
 
     /**
+     * Setup phase's ticker, will fill the hand
+     */
+    private fun tickOnSetup(gameDeck: MutableList<Card>, totalHandSize: Int): Boolean {
+        fillHand(gameDeck, totalHandSize)
+        return handSize == totalHandSize
+    }
+
+    /**
      * Depending on discarding or playing a set of selected cards, this will either play a discard animation and
      * call for discard, or, ...
      */
@@ -137,7 +149,7 @@ class GameLoop(val component: PlayerDeckComponent) {
             if (discardAnimationTick == 1) {
                 raiseSelectedCards()
             }
-            if (discardAnimationTick == 10) {
+            if (discardAnimationTick == discardTick) {
                 discardSelectedCards()
             }
             return true
@@ -156,10 +168,16 @@ class GameLoop(val component: PlayerDeckComponent) {
         return false
     }
 
+    /**
+     * Play phases ticker
+     */
     private fun tickOnPlay(): Boolean {
         return false
     }
 
+    /**
+     * Triggers last once on each game stage tick
+     */
     private fun endTickOn(gameStage: GameStage) {
         if (gameStage == GameStage.CHOICE_PHASE) {
             if (isDiscarding) {
@@ -171,6 +189,9 @@ class GameLoop(val component: PlayerDeckComponent) {
         }
     }
 
+    /**
+     * Triggers immediately after a new game stage is picked
+     */
     private fun startTickOn(gameStage: GameStage) {
         if (gameStage == GameStage.PLAY_PHASE) {
             reorderHandByRankOrSuit()
@@ -181,6 +202,9 @@ class GameLoop(val component: PlayerDeckComponent) {
         }
     }
 
+    /**
+     * Sorts cards in hand depending on orderByRank or not. Not is order by suit
+     */
     fun reorderHandByRankOrSuit() {
         if (orderByRank) {
             hand.sortByDescending { it.card.rank}
@@ -192,9 +216,11 @@ class GameLoop(val component: PlayerDeckComponent) {
         positionHandCards()
     }
 
+    /**
+     * Calculates equal distance between a set of cards in hand, isSelected accounted for and arch height
+     */
     private fun positionHandCards() {
         val points = calculateEquallySpacedPoints(handSize)
-        val arcHeight = 6 // Maximum height adjustment for the arc
         val centerIndex = (hand.size - 1) / 2.0 // Center index for the arc
 
         for ((counter, space) in points.withIndex()) {
@@ -209,10 +235,7 @@ class GameLoop(val component: PlayerDeckComponent) {
         }
     }
 
-    private fun tickOnSetup(gameDeck: MutableList<Card>, totalHandSize: Int): Boolean {
-        fillHand(gameDeck, totalHandSize)
-        return handSize == totalHandSize
-    }
+
 
     private fun fillHand(gameDeck: MutableList<Card>, totalHandSize: Int) {
         if (handSize < totalHandSize) {
@@ -239,6 +262,9 @@ class GameLoop(val component: PlayerDeckComponent) {
         return Vector3i(handLevelX + points[index], screenHeight - handLevelY - yOffset.toInt(), index * 4)
     }
 
+    /**
+     * Transfer selected cards to playedHand list, decrease current hand size and reset transforms for cards
+     */
     private fun moveSelectedCardsToPlayedHand() {
         hand.removeAll { it.isSelected.also { isSelected -> if (isSelected) playedHand.add(it) } }
         playedHand.forEach {
@@ -249,6 +275,9 @@ class GameLoop(val component: PlayerDeckComponent) {
         }
     }
 
+    /**
+     * Mark all selected cards in hand with isDiscarded and sets the target position off-screen
+     */
     private fun discardSelectedCards() {
         hand.filter { it.isSelected }.forEach {
             it.isDiscarded = true
@@ -257,16 +286,26 @@ class GameLoop(val component: PlayerDeckComponent) {
         }
     }
 
+    /**
+     * Sets the selected cards in hand's target position slightly above its original position
+     */
     private fun raiseSelectedCards() {
         hand.filter { it.isSelected }.forEach {
             it.targetScreenPos = Vector3i(it.screenPos.x, it.screenPos.y - 20, it.screenPos.z)
         }
     }
 
+    /**
+     * Uses reorderHandByPos with standard values for hand
+     */
     fun reorderHandByPos() {
         reorderHandByPos(hand, handLevelY, true, (screenWidth / 2.5).toInt(), handLevelX)
     }
 
+    /**
+     * Sorts the hand by screenPos, syncs the new hand, selects the new target pos in an arch to each card to
+     * be in line with its new hand order
+     */
     private fun reorderHandByPos(hand: MutableList<CardObject>, handYLevel: Int, arch: Boolean, width: Int, handLevelX: Int) {
         hand.sortBy { it.screenPos.x }
         JokerComponents.DECK.sync(component.player)
