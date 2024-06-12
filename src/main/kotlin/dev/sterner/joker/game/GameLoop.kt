@@ -119,7 +119,7 @@ class GameLoop(val component: PlayerDeckComponent) {
      */
     private fun handlePlayPhase() {
         gameStageCounter++
-        if (tickOnPlay(component.gameDeck, component.totalHandSize) && gameStageCounter >= gameStage.time) {
+        if (tickOnPlay() && gameStageCounter >= gameStage.time) {
             gameStageCounter = 0
             endTickOn(gameStage)
             gameStage = GameStage.EVAL_PHASE
@@ -156,7 +156,7 @@ class GameLoop(val component: PlayerDeckComponent) {
         return false
     }
 
-    private fun tickOnPlay(gameDeck: MutableList<Card>, totalHandSize: Int): Boolean {
+    private fun tickOnPlay(): Boolean {
         return false
     }
 
